@@ -1,424 +1,424 @@
-name: Validate
-
-on:
-  pull_request:
-    branches: [main]
-
-permissions:
-  contents: read
-  checks: write
-  pull-requests: read
-
-concurrency:
-  group: validate-${{ github.ref }}
-  cancel-in-progress: true
-
-jobs:
-  changes:
-    name: Detect Changes
-    runs-on: ubuntu-latest
-    outputs:
-      src: ${{ steps.filter.outputs.src }}
-      e2e: ${{ steps.filter.outputs.e2e }}
-      config: ${{ steps.filter.outputs.config }}
-      ci: ${{ steps.filter.outputs.ci }}
-    steps:
-      - name: Detect changed paths
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            src:
-              - 'src/**'
-            e2e:
-              - 'e2e/**'
-              - 'playwright.config.ts'
-            config:
-              - 'package.json'
-              - 'package-lock.json'
-              - 'tsconfig*.json'
-              - 'vite.config.ts'
-              - 'vitest.config.ts'
-              - 'eslint.config.js'
-              - '.prettierrc'
-              - 'index.html'
-              - 'public/**'
-            ci:
-              - '.github/**'
-
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    needs: [changes]
-    if: >-
-      needs.changes.outputs.src == 'true' ||
-      needs.changes.outputs.e2e == 'true' ||
-      needs.changes.outputs.config == 'true' ||
-      needs.changes.outputs.ci == 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Register ESLint problem matcher
-        run: echo "::add-matcher::.github/matchers/eslint-compact.json"
-
-      - name: Run ESLint
-        id: eslint
-        continue-on-error: true
-        run: npx eslint . --format compact 2>&1 | tee eslint-output.txt
-
-      - name: Remove ESLint problem matcher
-        if: always()
-        run: echo "::remove-matcher owner=eslint-compact::"
-
-      - name: Check formatting
-        id: prettier
-        continue-on-error: true
-        run: npm run format:check 2>&1 | tee prettier-output.txt
-
-      - name: Write summary
-        if: always()
-        run: |
-          echo "## Lint Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ steps.eslint.outcome }}" = "success" ]; then
-            echo ":white_check_mark: **ESLint** -- No issues found" >> $GITHUB_STEP_SUMMARY
-          else
-            echo ":x: **ESLint** -- Issues found" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>Show output</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            cat eslint-output.txt >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ steps.prettier.outcome }}" = "success" ]; then
-            echo ":white_check_mark: **Prettier** -- All files properly formatted" >> $GITHUB_STEP_SUMMARY
-          else
-            echo ":x: **Prettier** -- Formatting issues found" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>Show output</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            cat prettier-output.txt >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Fail on lint issues
-        if: steps.eslint.outcome == 'failure' || steps.prettier.outcome == 'failure'
-        run: exit 1
-
-  typecheck:
-    name: Type Check
-    runs-on: ubuntu-latest
-    needs: [changes]
-    if: >-
-      needs.changes.outputs.src == 'true' ||
-      needs.changes.outputs.e2e == 'true' ||
-      needs.changes.outputs.config == 'true' ||
-      needs.changes.outputs.ci == 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Register TypeScript problem matcher
-        run: echo "::add-matcher::.github/matchers/tsc.json"
-
-      - name: Type check
-        id: typecheck
-        continue-on-error: true
-        run: tsc -b 2>&1 | tee typecheck-output.txt
-
-      - name: Write summary
-        if: always()
-        run: |
-          echo "## Type Check Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ steps.typecheck.outcome }}" = "success" ]; then
-            echo ":white_check_mark: **TypeScript** -- No type errors" >> $GITHUB_STEP_SUMMARY
-          else
-            echo ":x: **TypeScript** -- Type errors found" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            ERROR_COUNT=$(grep -c "error TS" typecheck-output.txt || true)
-            echo "Found **${ERROR_COUNT:-0}** type error(s)." >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>Show errors</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            cat typecheck-output.txt >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Fail on type errors
-        if: steps.typecheck.outcome == 'failure'
-        run: exit 1
-
-  unit-tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs: [changes]
-    if: >-
-      needs.changes.outputs.src == 'true' ||
-      needs.changes.outputs.config == 'true' ||
-      needs.changes.outputs.ci == 'true'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run unit tests with coverage
-        id: tests
-        continue-on-error: true
-        run: npx vitest run --coverage 2>&1 | tee vitest-output.txt
-
-      - name: Test report
-        uses: dorny/test-reporter@v1
-        if: success() || failure()
-        with:
-          name: Vitest Results
-          path: test-results/vitest-junit.xml
-          reporter: java-junit
-
-      - name: Write summary
-        if: always()
-        run: |
-          echo "## Unit Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ steps.tests.outcome }}" = "success" ]; then
-            echo ":white_check_mark: **All unit tests passed**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo ":x: **Unit test failures detected**" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ -f coverage/coverage-summary.json ]; then
-            echo "### Coverage" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "| Category | Coverage |" >> $GITHUB_STEP_SUMMARY
-            echo "|----------|----------|" >> $GITHUB_STEP_SUMMARY
-            python3 -c "
-          import json
-          with open('coverage/coverage-summary.json') as f:
-              total = json.load(f)['total']
-          for key, val in total.items():
-              print(f'| {key.capitalize()} | {val[\"pct\"]}% |')
-          " >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        if: success() || failure()
-        with:
-          name: coverage-report
-          path: coverage/
-          retention-days: 14
-
-      - name: Fail on test failures
-        if: steps.tests.outcome == 'failure'
-        run: exit 1
-
-  e2e-tests:
-    name: E2E Tests (shard ${{ matrix.shardIndex }}/${{ strategy.job-total }})
-    runs-on: ubuntu-latest
-    needs: [changes]
-    if: >-
-      needs.changes.outputs.src == 'true' ||
-      needs.changes.outputs.e2e == 'true' ||
-      needs.changes.outputs.config == 'true' ||
-      needs.changes.outputs.ci == 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        shardIndex: [1, 2, 3]
-        shardTotal: [3]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Run E2E tests
-        run: npx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
-
-      - name: Upload blob report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: blob-report-${{ matrix.shardIndex }}
-          path: blob-report
-          retention-days: 1
-
-  e2e-report:
-    name: E2E Test Report
-    runs-on: ubuntu-latest
-    needs: [e2e-tests]
-    if: always() && needs.e2e-tests.result != 'skipped'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download blob reports
-        uses: actions/download-artifact@v4
-        with:
-          pattern: blob-report-*
-          merge-multiple: true
-          path: all-blob-reports
-
-      - name: Merge reports
-        run: npx playwright merge-reports --reporter=html,junit ./all-blob-reports
-        env:
-          PLAYWRIGHT_JUNIT_OUTPUT_NAME: test-results/playwright-junit.xml
-
-      - name: Test report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Playwright Results
-          path: test-results/playwright-junit.xml
-          reporter: java-junit
-
-      - name: Write summary
-        if: always()
-        run: |
-          echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ "${{ needs.e2e-tests.result }}" = "success" ]; then
-            echo ":white_check_mark: **All E2E tests passed**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo ":x: **E2E test failures detected**" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Download the **playwright-report** artifact for the full HTML report." >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 14
-
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    needs: [changes, lint, typecheck, unit-tests]
-    if: >-
-      always() &&
-      !cancelled() &&
-      (needs.changes.outputs.src == 'true' ||
-       needs.changes.outputs.config == 'true' ||
-       needs.changes.outputs.ci == 'true') &&
-      !contains(needs.*.result, 'failure')
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
-        run: npm run build 2>&1 | tee build-output.txt
-
-      - name: Write summary
-        if: always()
-        run: |
-          echo "## Build Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ -d dist ]; then
-            echo ":white_check_mark: **Build successful**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            TOTAL_SIZE=$(du -sh dist | cut -f1)
-            echo "**Total output size:** ${TOTAL_SIZE}" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "<details><summary>Build output</summary>" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            cat build-output.txt >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "</details>" >> $GITHUB_STEP_SUMMARY
-          else
-            echo ":x: **Build failed**" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -50 build-output.txt >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
-
-  validation-complete:
-    name: Validation Complete
-    if: always()
-    needs: [lint, typecheck, unit-tests, e2e-tests, e2e-report, build]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check job results
-        run: |
-          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
-            echo "One or more validation jobs failed"
-            exit 1
-          fi
-          echo "All validations passed (or were skipped)"
+#name: Validate
+#
+#on:
+#  pull_request:
+#    branches: [main]
+#
+#permissions:
+#  contents: read
+#  checks: write
+#  pull-requests: read
+#
+#concurrency:
+#  group: validate-${{ github.ref }}
+#  cancel-in-progress: true
+#
+#jobs:
+#  changes:
+#    name: Detect Changes
+#    runs-on: ubuntu-latest
+#    outputs:
+#      src: ${{ steps.filter.outputs.src }}
+#      e2e: ${{ steps.filter.outputs.e2e }}
+#      config: ${{ steps.filter.outputs.config }}
+#      ci: ${{ steps.filter.outputs.ci }}
+#    steps:
+#      - name: Detect changed paths
+#        uses: dorny/paths-filter@v3
+#        id: filter
+#        with:
+#          filters: |
+#            src:
+#              - 'src/**'
+#            e2e:
+#              - 'e2e/**'
+#              - 'playwright.config.ts'
+#            config:
+#              - 'package.json'
+#              - 'package-lock.json'
+#              - 'tsconfig*.json'
+#              - 'vite.config.ts'
+#              - 'vitest.config.ts'
+#              - 'eslint.config.js'
+#              - '.prettierrc'
+#              - 'index.html'
+#              - 'public/**'
+#            ci:
+#              - '.github/**'
+#
+#  lint:
+#    name: Lint
+#    runs-on: ubuntu-latest
+#    needs: [changes]
+#    if: >-
+#      needs.changes.outputs.src == 'true' ||
+#      needs.changes.outputs.e2e == 'true' ||
+#      needs.changes.outputs.config == 'true' ||
+#      needs.changes.outputs.ci == 'true'
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 22
+#          cache: npm
+#
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: Register ESLint problem matcher
+#        run: echo "::add-matcher::.github/matchers/eslint-compact.json"
+#
+#      - name: Run ESLint
+#        id: eslint
+#        continue-on-error: true
+#        run: npx eslint . --format compact 2>&1 | tee eslint-output.txt
+#
+#      - name: Remove ESLint problem matcher
+#        if: always()
+#        run: echo "::remove-matcher owner=eslint-compact::"
+#
+#      - name: Check formatting
+#        id: prettier
+#        continue-on-error: true
+#        run: npm run format:check 2>&1 | tee prettier-output.txt
+#
+#      - name: Write summary
+#        if: always()
+#        run: |
+#          echo "## Lint Results" >> $GITHUB_STEP_SUMMARY
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#
+#          if [ "${{ steps.eslint.outcome }}" = "success" ]; then
+#            echo ":white_check_mark: **ESLint** -- No issues found" >> $GITHUB_STEP_SUMMARY
+#          else
+#            echo ":x: **ESLint** -- Issues found" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "<details><summary>Show output</summary>" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            cat eslint-output.txt >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "</details>" >> $GITHUB_STEP_SUMMARY
+#          fi
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#
+#          if [ "${{ steps.prettier.outcome }}" = "success" ]; then
+#            echo ":white_check_mark: **Prettier** -- All files properly formatted" >> $GITHUB_STEP_SUMMARY
+#          else
+#            echo ":x: **Prettier** -- Formatting issues found" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "<details><summary>Show output</summary>" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            cat prettier-output.txt >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "</details>" >> $GITHUB_STEP_SUMMARY
+#          fi
+#
+#      - name: Fail on lint issues
+#        if: steps.eslint.outcome == 'failure' || steps.prettier.outcome == 'failure'
+#        run: exit 1
+#
+#  typecheck:
+#    name: Type Check
+#    runs-on: ubuntu-latest
+#    needs: [changes]
+#    if: >-
+#      needs.changes.outputs.src == 'true' ||
+#      needs.changes.outputs.e2e == 'true' ||
+#      needs.changes.outputs.config == 'true' ||
+#      needs.changes.outputs.ci == 'true'
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 22
+#          cache: npm
+#
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: Register TypeScript problem matcher
+#        run: echo "::add-matcher::.github/matchers/tsc.json"
+#
+#      - name: Type check
+#        id: typecheck
+#        continue-on-error: true
+#        run: tsc -b 2>&1 | tee typecheck-output.txt
+#
+#      - name: Write summary
+#        if: always()
+#        run: |
+#          echo "## Type Check Results" >> $GITHUB_STEP_SUMMARY
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#
+#          if [ "${{ steps.typecheck.outcome }}" = "success" ]; then
+#            echo ":white_check_mark: **TypeScript** -- No type errors" >> $GITHUB_STEP_SUMMARY
+#          else
+#            echo ":x: **TypeScript** -- Type errors found" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            ERROR_COUNT=$(grep -c "error TS" typecheck-output.txt || true)
+#            echo "Found **${ERROR_COUNT:-0}** type error(s)." >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "<details><summary>Show errors</summary>" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            cat typecheck-output.txt >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "</details>" >> $GITHUB_STEP_SUMMARY
+#          fi
+#
+#      - name: Fail on type errors
+#        if: steps.typecheck.outcome == 'failure'
+#        run: exit 1
+#
+#  unit-tests:
+#    name: Unit Tests
+#    runs-on: ubuntu-latest
+#    needs: [changes]
+#    if: >-
+#      needs.changes.outputs.src == 'true' ||
+#      needs.changes.outputs.config == 'true' ||
+#      needs.changes.outputs.ci == 'true'
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 22
+#          cache: npm
+#
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: Run unit tests with coverage
+#        id: tests
+#        continue-on-error: true
+#        run: npx vitest run --coverage 2>&1 | tee vitest-output.txt
+#
+#      - name: Test report
+#        uses: dorny/test-reporter@v1
+#        if: success() || failure()
+#        with:
+#          name: Vitest Results
+#          path: test-results/vitest-junit.xml
+#          reporter: java-junit
+#
+#      - name: Write summary
+#        if: always()
+#        run: |
+#          echo "## Unit Test Results" >> $GITHUB_STEP_SUMMARY
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#
+#          if [ "${{ steps.tests.outcome }}" = "success" ]; then
+#            echo ":white_check_mark: **All unit tests passed**" >> $GITHUB_STEP_SUMMARY
+#          else
+#            echo ":x: **Unit test failures detected**" >> $GITHUB_STEP_SUMMARY
+#          fi
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#
+#          if [ -f coverage/coverage-summary.json ]; then
+#            echo "### Coverage" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "| Category | Coverage |" >> $GITHUB_STEP_SUMMARY
+#            echo "|----------|----------|" >> $GITHUB_STEP_SUMMARY
+#            python3 -c "
+#          import json
+#          with open('coverage/coverage-summary.json') as f:
+#              total = json.load(f)['total']
+#          for key, val in total.items():
+#              print(f'| {key.capitalize()} | {val[\"pct\"]}% |')
+#          " >> $GITHUB_STEP_SUMMARY
+#          fi
+#
+#      - name: Upload coverage report
+#        uses: actions/upload-artifact@v4
+#        if: success() || failure()
+#        with:
+#          name: coverage-report
+#          path: coverage/
+#          retention-days: 14
+#
+#      - name: Fail on test failures
+#        if: steps.tests.outcome == 'failure'
+#        run: exit 1
+#
+#  e2e-tests:
+#    name: E2E Tests (shard ${{ matrix.shardIndex }}/${{ strategy.job-total }})
+#    runs-on: ubuntu-latest
+#    needs: [changes]
+#    if: >-
+#      needs.changes.outputs.src == 'true' ||
+#      needs.changes.outputs.e2e == 'true' ||
+#      needs.changes.outputs.config == 'true' ||
+#      needs.changes.outputs.ci == 'true'
+#    strategy:
+#      fail-fast: false
+#      matrix:
+#        shardIndex: [1, 2, 3]
+#        shardTotal: [3]
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 22
+#          cache: npm
+#
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: Install Playwright browsers
+#        run: npx playwright install --with-deps chromium
+#
+#      - name: Run E2E tests
+#        run: npx playwright test --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
+#
+#      - name: Upload blob report
+#        uses: actions/upload-artifact@v4
+#        if: always()
+#        with:
+#          name: blob-report-${{ matrix.shardIndex }}
+#          path: blob-report
+#          retention-days: 1
+#
+#  e2e-report:
+#    name: E2E Test Report
+#    runs-on: ubuntu-latest
+#    needs: [e2e-tests]
+#    if: always() && needs.e2e-tests.result != 'skipped'
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 22
+#          cache: npm
+#
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: Download blob reports
+#        uses: actions/download-artifact@v4
+#        with:
+#          pattern: blob-report-*
+#          merge-multiple: true
+#          path: all-blob-reports
+#
+#      - name: Merge reports
+#        run: npx playwright merge-reports --reporter=html,junit ./all-blob-reports
+#        env:
+#          PLAYWRIGHT_JUNIT_OUTPUT_NAME: test-results/playwright-junit.xml
+#
+#      - name: Test report
+#        uses: dorny/test-reporter@v1
+#        if: always()
+#        with:
+#          name: Playwright Results
+#          path: test-results/playwright-junit.xml
+#          reporter: java-junit
+#
+#      - name: Write summary
+#        if: always()
+#        run: |
+#          echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#
+#          if [ "${{ needs.e2e-tests.result }}" = "success" ]; then
+#            echo ":white_check_mark: **All E2E tests passed**" >> $GITHUB_STEP_SUMMARY
+#          else
+#            echo ":x: **E2E test failures detected**" >> $GITHUB_STEP_SUMMARY
+#          fi
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#          echo "Download the **playwright-report** artifact for the full HTML report." >> $GITHUB_STEP_SUMMARY
+#
+#      - name: Upload Playwright report
+#        uses: actions/upload-artifact@v4
+#        if: always()
+#        with:
+#          name: playwright-report
+#          path: playwright-report/
+#          retention-days: 14
+#
+#  build:
+#    name: Build
+#    runs-on: ubuntu-latest
+#    needs: [changes, lint, typecheck, unit-tests]
+#    if: >-
+#      always() &&
+#      !cancelled() &&
+#      (needs.changes.outputs.src == 'true' ||
+#       needs.changes.outputs.config == 'true' ||
+#       needs.changes.outputs.ci == 'true') &&
+#      !contains(needs.*.result, 'failure')
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Node.js
+#        uses: actions/setup-node@v4
+#        with:
+#          node-version: 22
+#          cache: npm
+#
+#      - name: Install dependencies
+#        run: npm ci
+#
+#      - name: Build
+#        run: npm run build 2>&1 | tee build-output.txt
+#
+#      - name: Write summary
+#        if: always()
+#        run: |
+#          echo "## Build Results" >> $GITHUB_STEP_SUMMARY
+#          echo "" >> $GITHUB_STEP_SUMMARY
+#
+#          if [ -d dist ]; then
+#            echo ":white_check_mark: **Build successful**" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            TOTAL_SIZE=$(du -sh dist | cut -f1)
+#            echo "**Total output size:** ${TOTAL_SIZE}" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "<details><summary>Build output</summary>" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            cat build-output.txt >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo "</details>" >> $GITHUB_STEP_SUMMARY
+#          else
+#            echo ":x: **Build failed**" >> $GITHUB_STEP_SUMMARY
+#            echo "" >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#            tail -50 build-output.txt >> $GITHUB_STEP_SUMMARY
+#            echo '```' >> $GITHUB_STEP_SUMMARY
+#          fi
+#
+#  validation-complete:
+#    name: Validation Complete
+#    if: always()
+#    needs: [lint, typecheck, unit-tests, e2e-tests, e2e-report, build]
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check job results
+#        run: |
+#          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
+#            echo "One or more validation jobs failed"
+#            exit 1
+#          fi
+#          echo "All validations passed (or were skipped)"

@@ -51,16 +51,16 @@ export function Layout() {
         <>
           <div className="flex flex-1 overflow-hidden">
             {/* Desktop: Left panel - Object list */}
-            {!isMobile && (
-              <div
-                className={cn(
-                  'border-r border-border bg-background transition-all duration-200 motion-reduce:transition-none',
-                  leftPanelOpen ? 'w-60' : 'w-0',
-                )}
-              >
-                {leftPanelOpen && <ObjectListPanel />}
-              </div>
-            )}
+            {/*{!isMobile && (*/}
+            {/*  <div*/}
+            {/*    className={cn(*/}
+            {/*      'border-r border-border bg-background transition-all duration-200 motion-reduce:transition-none',*/}
+            {/*      leftPanelOpen ? 'w-60' : 'w-0',*/}
+            {/*    )}*/}
+            {/*  >*/}
+            {/*    {leftPanelOpen && <ObjectListPanel />}*/}
+            {/*  </div>*/}
+            {/*)}*/}
 
             {/* Center - 3D Viewport */}
             <div className="flex-1">
@@ -83,80 +83,80 @@ export function Layout() {
           </div>
 
           {/* Mobile: Left panel as sheet overlay */}
-          {isMobile && (
-            <Sheet
-              open={leftPanelOpen}
-              onOpenChange={(open) => {
-                setLeftPanelOpen(open)
-                if (open) setRightPanelOpen(false)
-              }}
-            >
-              <SheetContent side="left" className="w-60 p-0">
-                <SheetHeader className="sr-only">
-                  <SheetTitle>Objects</SheetTitle>
-                </SheetHeader>
-                <ObjectListPanel />
-              </SheetContent>
-            </Sheet>
-          )}
+          {/*{isMobile && (*/}
+          {/*  <Sheet*/}
+          {/*    open={leftPanelOpen}*/}
+          {/*    onOpenChange={(open) => {*/}
+          {/*      setLeftPanelOpen(open)*/}
+          {/*      if (open) setRightPanelOpen(false)*/}
+          {/*    }}*/}
+          {/*  >*/}
+          {/*    <SheetContent side="left" className="w-60 p-0">*/}
+          {/*      <SheetHeader className="sr-only">*/}
+          {/*        <SheetTitle>Objects</SheetTitle>*/}
+          {/*      </SheetHeader>*/}
+          {/*      <ObjectListPanel />*/}
+          {/*    </SheetContent>*/}
+          {/*  </Sheet>*/}
+          {/*)}*/}
 
           {/* Mobile: Right panel as sheet overlay */}
-          {isMobile && (
-            <Sheet
-              open={rightPanelOpen}
-              onOpenChange={(open) => {
-                setRightPanelOpen(open)
-                if (open) setLeftPanelOpen(false)
-              }}
-            >
-              <SheetContent side="right" className="w-72 p-0">
-                <SheetHeader className="sr-only">
-                  <SheetTitle>Properties</SheetTitle>
-                </SheetHeader>
-                <PropertiesPanel />
-              </SheetContent>
-            </Sheet>
-          )}
+          {/*{isMobile && (*/}
+          {/*  <Sheet*/}
+          {/*    open={rightPanelOpen}*/}
+          {/*    onOpenChange={(open) => {*/}
+          {/*      setRightPanelOpen(open)*/}
+          {/*      if (open) setLeftPanelOpen(false)*/}
+          {/*    }}*/}
+          {/*  >*/}
+          {/*    <SheetContent side="right" className="w-72 p-0">*/}
+          {/*      <SheetHeader className="sr-only">*/}
+          {/*        <SheetTitle>Properties</SheetTitle>*/}
+          {/*      </SheetHeader>*/}
+          {/*      <PropertiesPanel />*/}
+          {/*    </SheetContent>*/}
+          {/*  </Sheet>*/}
+          {/*)}*/}
         </>
       ) : (
         <PrintLayoutProvider>
           <div className="flex flex-1 overflow-hidden">
             {/* Center - Print Layout Viewport */}
-            <div className="flex-1">
-              <ViewportErrorBoundary key={activeView}>
-                <PrintLayoutViewport />
-              </ViewportErrorBoundary>
-            </div>
+            {/*<div className="flex-1">*/}
+            {/*  <ViewportErrorBoundary key={activeView}>*/}
+            {/*    <PrintLayoutViewport />*/}
+            {/*  </ViewportErrorBoundary>*/}
+            {/*</div>*/}
 
             {/* Desktop: Right panel - Print Settings */}
-            {!isMobile && (
-              <div
-                className={cn(
-                  'border-l border-border bg-background transition-all duration-200 motion-reduce:transition-none',
-                  rightPanelOpen ? 'w-72' : 'w-0',
-                )}
-              >
-                {rightPanelOpen && <PrintSettingsPanel />}
-              </div>
-            )}
+            {/*{!isMobile && (*/}
+            {/*  <div*/}
+            {/*    className={cn(*/}
+            {/*      'border-l border-border bg-background transition-all duration-200 motion-reduce:transition-none',*/}
+            {/*      rightPanelOpen ? 'w-72' : 'w-0',*/}
+            {/*    )}*/}
+            {/*  >*/}
+            {/*    {rightPanelOpen && <PrintSettingsPanel />}*/}
+            {/*  </div>*/}
+            {/*)}*/}
           </div>
 
           {/* Mobile: Right panel as sheet overlay */}
-          {isMobile && (
-            <Sheet
-              open={rightPanelOpen}
-              onOpenChange={(open) => {
-                setRightPanelOpen(open)
-              }}
-            >
-              <SheetContent side="right" className="w-72 p-0">
-                <SheetHeader className="sr-only">
-                  <SheetTitle>Print Settings</SheetTitle>
-                </SheetHeader>
-                <PrintSettingsPanel />
-              </SheetContent>
-            </Sheet>
-          )}
+          {/*{isMobile && (*/}
+          {/*  <Sheet*/}
+          {/*    open={rightPanelOpen}*/}
+          {/*    onOpenChange={(open) => {*/}
+          {/*      setRightPanelOpen(open)*/}
+          {/*    }}*/}
+          {/*  >*/}
+          {/*    <SheetContent side="right" className="w-72 p-0">*/}
+          {/*      <SheetHeader className="sr-only">*/}
+          {/*        <SheetTitle>Print Settings</SheetTitle>*/}
+          {/*      </SheetHeader>*/}
+          {/*      <PrintSettingsPanel />*/}
+          {/*    </SheetContent>*/}
+          {/*  </Sheet>*/}
+          {/*)}*/}
         </PrintLayoutProvider>
       )}
     </div>

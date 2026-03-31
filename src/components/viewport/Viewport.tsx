@@ -122,6 +122,14 @@ function Scene() {
     [selectedObjectIds, objects],
   )
 
+  useEffect(() => {
+    // Если есть объекты и ни один не выделен — выделяем первый
+    if (objects.length > 0 && selectedObjectIds.length === 0) {
+      const setSelected = useUIStore.getState().setSelectedObjectIds
+      setSelected([objects[0].id])
+    }
+  }, [objects, selectedObjectIds])
+
   return (
     <>
       {/* Lighting */}
@@ -143,6 +151,9 @@ function Scene() {
         maxDistance={2000}
         enableDamping
         dampingFactor={0.1}
+        enableRotate={false}
+        enablePan={true}
+        enableZoom={true}
       />
 
       {/* Camera preset controller */}
@@ -156,12 +167,12 @@ function Scene() {
 
       {/* Scene objects */}
       <group
-        onClick={(e) => {
-          // Clicks on objects or the grid are handled by their own handlers;
-          // only clear selection for background/empty-space clicks
-          if (e.object.type === 'GridHelper' || e.object.type === 'Mesh') return
-          clearSelection()
-        }}
+        // onClick={(e) => {
+        //   // Clicks on objects or the grid are handled by their own handlers;
+        //   // only clear selection for background/empty-space clicks
+        //   if (e.object.type === 'GridHelper' || e.object.type === 'Mesh') return
+        //   clearSelection()
+        // }}
       >
         {objects.map((obj) => (
           <SceneObject key={obj.id} object={obj} />
@@ -169,14 +180,14 @@ function Scene() {
       </group>
 
       {/* Measurement overlay */}
-      {showMeasurements && singleSelectedObject && (
-        <MeasurementOverlay object={singleSelectedObject} />
-      )}
+      {/*{showMeasurements && singleSelectedObject && (*/}
+      {/*  <MeasurementOverlay object={singleSelectedObject} />*/}
+      {/*)}*/}
 
       {/* Gizmo helper - axis indicator in corner */}
-      <GizmoHelper alignment="bottom-right" margin={[60, 60]}>
-        <GizmoViewport axisColors={['#e74c3c', '#2ecc71', '#3498db']} labelColor="white" />
-      </GizmoHelper>
+      {/*<GizmoHelper alignment="bottom-right" margin={[60, 60]}>*/}
+      {/*  <GizmoViewport axisColors={['#e74c3c', '#2ecc71', '#3498db']} labelColor="white" />*/}
+      {/*</GizmoHelper>*/}
     </>
   )
 }
@@ -197,9 +208,9 @@ export function Viewport() {
         }}
         shadows
         gl={{ antialias: true }}
-        onPointerMissed={() => {
-          clearSelection()
-        }}
+        // onPointerMissed={() => {
+        //   clearSelection()
+        // }}
       >
         <color attach="background" args={[bgColor]} />
         <fog attach="fog" args={[bgColor, 1000, 3000]} />

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { BufferGeometry } from 'three'
 import type { Group } from 'three'
 import { Edges } from '@react-three/drei'
@@ -14,8 +14,7 @@ import { modifierKindRegistry } from '@/engine/registry/modifierKindRegistry'
 import { useProjectStore } from '@/store/projectStore'
 import { useProfileStore } from '@/store/profileStore'
 import { useUIStore } from '@/store/uiStore'
-import { TransformGizmo } from './TransformGizmo'
-import { isGizmoActive } from './gizmoState'
+import { useObjectDrag } from './useObjectDrag'
 
 interface SceneObjectProps {
   object: GridfinityObject
@@ -61,23 +60,19 @@ function ModifierMesh({ modifier, context, profile }: ModifierMeshProps) {
 
   const geometry = useMemo(() => {
     return generateModifierGeometry(modifier, context, profile)
-    // curveQuality triggers regeneration via module-level setCurveQuality() in uiStore
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modifier, context, profile, curveQuality])
 
   useEffect(() => {
     return () => {
-      if (geometry) geometry.dispose()
+      geometry?.dispose()
     }
   }, [geometry])
 
   const childContexts = useMemo((): ModifierContext[] => {
     const reg = modifierKindRegistry.get(modifier.kind)
     if (reg?.subdividesSpace && reg.computeChildContext) {
-      const result = reg.computeChildContext(
-        modifier.params as unknown as Record<string, unknown>,
-        context,
-      )
+      const result = reg.computeChildContext(modifier.params as Record<string, unknown>, context)
       return Array.isArray(result) ? result : [result]
     }
     return [context]
@@ -103,6 +98,7 @@ function ModifierMesh({ modifier, context, profile }: ModifierMeshProps) {
           />
         </mesh>
       )}
+
       {childContexts.map((ctx, i) => (
         <ModifierMeshes key={`${modifier.id}-ctx-${i}`} parentId={modifier.id} context={ctx} />
       ))}
@@ -111,22 +107,22 @@ function ModifierMesh({ modifier, context, profile }: ModifierMeshProps) {
 }
 
 export function SceneObject({ object }: SceneObjectProps) {
-  const [groupNode, setGroupNode] = useState<Group | null>(null)
+  const groupRef = useRef<Group | null>(null)
+
   const activeProfile = useProfileStore((s) => s.activeProfile)
   const selectedObjectIds = useUIStore((s) => s.selectedObjectIds)
   const selectObject = useUIStore((s) => s.selectObject)
   const showWireframe = useUIStore((s) => s.showWireframe)
   const transparencyMode = useUIStore((s) => s.transparencyMode)
-
   const curveQuality = useUIStore((s) => s.curveQuality)
+
   const isSelected = selectedObjectIds.includes(object.id)
-  const isSingleSelected = selectedObjectIds.length === 1 && isSelected
 
   const geometry = useMemo(() => {
     const reg = objectKindRegistry.get(object.kind)
     if (!reg) return new BufferGeometry()
-    return reg.generateGeometry(object.params as unknown as Record<string, unknown>, activeProfile)
-    // curveQuality triggers regeneration via module-level setCurveQuality() in uiStore
+
+    return reg.generateGeometry(object.params as Record<string, unknown>, activeProfile)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [object.kind, object.params, activeProfile, curveQuality])
 
@@ -139,40 +135,55 @@ export function SceneObject({ object }: SceneObjectProps) {
   const modifierContext = useMemo(() => {
     const reg = objectKindRegistry.get(object.kind)
     if (reg?.supportsModifiers && reg.computeModifierContext) {
-      return reg.computeModifierContext(
-        object.params as unknown as Record<string, unknown>,
-        activeProfile,
-      )
+      return reg.computeModifierContext(object.params as Record<string, unknown>, activeProfile)
     }
     return null
   }, [object.kind, object.params, activeProfile])
 
+  const objParams = object.params as Record<string, unknown>
+  const gridWidth = objParams.gridWidth as number | undefined
+  const gridDepth = objParams.gridDepth as number | undefined
+
+  const { bindDrag, dragging } = useObjectDrag({
+    objectId: object.id,
+    objectRef: groupRef,
+    isSelected,
+    basePosition: object.position,
+    gridWidth,
+    gridDepth,
+  })
+
   const objectOpacity = transparencyMode ? 0.5 : 1.0
 
   return (
-    <>
-      <group ref={setGroupNode} position={object.position} rotation={object.rotation ?? [0, 0, 0]}>
-        <mesh
-          geometry={geometry}
-          onClick={(e) => {
-            e.stopPropagation()
-            if (isGizmoActive()) return
-            selectObject(object.id, e.shiftKey || e.ctrlKey || e.metaKey)
-          }}
-        >
-          <meshStandardMaterial
-            color={isSelected ? '#6b9bd2' : '#b0b0b0'}
-            roughness={0.6}
-            metalness={0.1}
-            transparent={transparencyMode}
-            opacity={objectOpacity}
-            wireframe={showWireframe}
-          />
-          {isSelected && !showWireframe && <Edges threshold={15} color="#4a90d9" lineWidth={2} />}
-        </mesh>
-        {modifierContext && <ModifierMeshes parentId={object.id} context={modifierContext} />}
-      </group>
-      {isSingleSelected && groupNode && <TransformGizmo target={groupNode} objectId={object.id} />}
-    </>
+    <group
+      ref={groupRef}
+      position={object.position}
+      rotation={object.rotation ?? [0, 0, 0]}
+      {...bindDrag}
+    >
+      <mesh
+        geometry={geometry}
+        onClick={(e) => {
+          e.stopPropagation()
+
+          if (dragging) return
+
+          selectObject(object.id, e.shiftKey || e.ctrlKey || e.metaKey)
+        }}
+      >
+        <meshStandardMaterial
+          color={isSelected ? '#6b9bd2' : '#b0b0b0'}
+          roughness={0.6}
+          metalness={0.1}
+          transparent={transparencyMode}
+          opacity={objectOpacity}
+          wireframe={showWireframe}
+        />
+        {isSelected && !showWireframe && <Edges threshold={15} color="#4a90d9" lineWidth={2} />}
+      </mesh>
+
+      {modifierContext && <ModifierMeshes parentId={object.id} context={modifierContext} />}
+    </group>
   )
 }

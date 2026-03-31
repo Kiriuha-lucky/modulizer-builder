@@ -173,7 +173,7 @@ export function Toolbar() {
         data-testid="toolbar"
       >
         {/* Left panel toggle */}
-        <Button
+        {/* <Button
           variant="ghost"
           size="icon"
           onClick={toggleLeftPanel}
@@ -182,12 +182,12 @@ export function Toolbar() {
           aria-expanded={leftPanelOpen}
         >
           <PanelLeft className="h-4 w-4" />
-        </Button>
+        </Button> */}
 
-        {!isMobile && <div className="h-5 w-px bg-border" />}
+        {/* {!isMobile && <div className="h-5 w-px bg-border" />} */}
 
         {/* Project dropdown - desktop only */}
-        {!isMobile && (
+        {/* {!isMobile && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 gap-1">
@@ -219,12 +219,12 @@ export function Toolbar() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+        )} */}
 
-        {!isMobile && <div className="h-5 w-px bg-border" />}
+        {/* {!isMobile && <div className="h-5 w-px bg-border" />} */}
 
         {/* Undo/Redo buttons - desktop */}
-        {!isMobile && (
+        {/* {!isMobile && (
           <TooltipProvider delayDuration={300}>
             <div className="flex items-center gap-0.5">
               <Tooltip>
@@ -261,194 +261,194 @@ export function Toolbar() {
               </Tooltip>
             </div>
           </TooltipProvider>
-        )}
+        )} */}
 
-        {!isMobile && <div className="h-5 w-px bg-border" />}
+        {/* {!isMobile && <div className="h-5 w-px bg-border" />} */}
 
         {/* View mode toggle */}
-        <TooltipProvider delayDuration={300}>
-          <div className="flex items-center gap-0.5 rounded-md border border-border p-0.5">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    'h-8 gap-1 px-2 text-xs md:h-6',
-                    isEditView && 'bg-accent text-accent-foreground',
-                  )}
-                  onClick={() => {
-                    setActiveView('edit')
-                  }}
-                  aria-label="Edit view"
-                  aria-pressed={isEditView}
-                >
-                  <Pencil className="h-3 w-3" />
-                  Edit
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Edit view</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    'h-8 gap-1 px-2 text-xs md:h-6',
-                    !isEditView && 'bg-accent text-accent-foreground',
-                  )}
-                  onClick={() => {
-                    setActiveView('printLayout')
-                  }}
-                  aria-label="Print layout view"
-                  aria-pressed={!isEditView}
-                >
-                  <Printer className="h-3 w-3" />
-                  Print
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Print layout view</TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
+        {/*<TooltipProvider delayDuration={300}>*/}
+        {/*  <div className="flex items-center gap-0.5 rounded-md border border-border p-0.5">*/}
+        {/*    <Tooltip>*/}
+        {/*      <TooltipTrigger asChild>*/}
+        {/*        <Button*/}
+        {/*          variant="ghost"*/}
+        {/*          size="sm"*/}
+        {/*          className={cn(*/}
+        {/*            'h-8 gap-1 px-2 text-xs md:h-6',*/}
+        {/*            isEditView && 'bg-accent text-accent-foreground',*/}
+        {/*          )}*/}
+        {/*          onClick={() => {*/}
+        {/*            setActiveView('edit')*/}
+        {/*          }}*/}
+        {/*          aria-label="Edit view"*/}
+        {/*          aria-pressed={isEditView}*/}
+        {/*        >*/}
+        {/*          <Pencil className="h-3 w-3" />*/}
+        {/*          Редактировать*/}
+        {/*        </Button>*/}
+        {/*      </TooltipTrigger>*/}
+        {/*      <TooltipContent>Edit view</TooltipContent>*/}
+        {/*    </Tooltip>*/}
+        {/*    <Tooltip>*/}
+        {/*      <TooltipTrigger asChild>*/}
+        {/*        <Button*/}
+        {/*          variant="ghost"*/}
+        {/*          size="sm"*/}
+        {/*          className={cn(*/}
+        {/*            'h-8 gap-1 px-2 text-xs md:h-6',*/}
+        {/*            !isEditView && 'bg-accent text-accent-foreground',*/}
+        {/*          )}*/}
+        {/*          onClick={() => {*/}
+        {/*            setActiveView('printLayout')*/}
+        {/*          }}*/}
+        {/*          aria-label="Print layout view"*/}
+        {/*          aria-pressed={!isEditView}*/}
+        {/*        >*/}
+        {/*          <Printer className="h-3 w-3" />*/}
+        {/*          Печать*/}
+        {/*        </Button>*/}
+        {/*      </TooltipTrigger>*/}
+        {/*      <TooltipContent>Print layout view</TooltipContent>*/}
+        {/*    </Tooltip>*/}
+        {/*  </div>*/}
+        {/*</TooltipProvider>*/}
 
-        {!isMobile && <div className="h-5 w-px bg-border" />}
+        {/* {!isMobile && <div className="h-5 w-px bg-border" />} */}
 
         {/* Edit view controls - desktop */}
         {!isMobile && isEditView && (
           <>
             {/* Add object dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-7 gap-1">
-                  <Plus className="h-4 w-4" />
-                  Add Object
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {objectKindRegistry.getAll().map((reg) => (
-                  <DropdownMenuItem
-                    key={reg.kind}
-                    onClick={() => {
-                      const id = addObject(reg.kind)
-                      selectObject(id)
-                    }}
-                  >
-                    {reg.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/*<DropdownMenu>*/}
+            {/*  <DropdownMenuTrigger asChild>*/}
+            {/*    <Button variant="ghost" size="sm" className="h-7 gap-1">*/}
+            {/*      <Plus className="h-4 w-4" />*/}
+            {/*      Add Object*/}
+            {/*    </Button>*/}
+            {/*  </DropdownMenuTrigger>*/}
+            {/*  <DropdownMenuContent>*/}
+            {/*    {objectKindRegistry.getAll().map((reg) => (*/}
+            {/*      <DropdownMenuItem*/}
+            {/*        key={reg.kind}*/}
+            {/*        onClick={() => {*/}
+            {/*          const id = addObject(reg.kind)*/}
+            {/*          selectObject(id)*/}
+            {/*        }}*/}
+            {/*      >*/}
+            {/*        {reg.label}*/}
+            {/*      </DropdownMenuItem>*/}
+            {/*    ))}*/}
+            {/*  </DropdownMenuContent>*/}
+            {/*</DropdownMenu>*/}
 
-            <div className="h-5 w-px bg-border" />
+            {/*<div className="h-5 w-px bg-border" />*/}
 
             {/* Camera presets */}
             <CameraPresets />
 
-            <div className="h-5 w-px bg-border" />
+            {/*<div className="h-5 w-px bg-border" />*/}
 
             {/* Snap to grid toggle */}
-            <TooltipProvider delayDuration={300}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn('h-7 w-7', snapToGrid && 'bg-accent text-accent-foreground')}
-                    onClick={toggleSnapToGrid}
-                    aria-label="Snap to grid"
-                    aria-pressed={snapToGrid}
-                  >
-                    <Grid3x3 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Snap to grid</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {/*<TooltipProvider delayDuration={300}>*/}
+            {/*  <Tooltip>*/}
+            {/*    <TooltipTrigger asChild>*/}
+            {/*      <Button*/}
+            {/*        variant="ghost"*/}
+            {/*        size="icon"*/}
+            {/*        className={cn('h-7 w-7', snapToGrid && 'bg-accent text-accent-foreground')}*/}
+            {/*        onClick={toggleSnapToGrid}*/}
+            {/*        aria-label="Snap to grid"*/}
+            {/*        aria-pressed={snapToGrid}*/}
+            {/*      >*/}
+            {/*        <Grid3x3 className="h-4 w-4" />*/}
+            {/*      </Button>*/}
+            {/*    </TooltipTrigger>*/}
+            {/*    <TooltipContent>Snap to grid</TooltipContent>*/}
+            {/*  </Tooltip>*/}
+            {/*</TooltipProvider>*/}
           </>
         )}
 
         {/* Add object dropdown - mobile */}
-        {isMobile && isEditView && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-9 gap-1">
-                <Plus className="h-4 w-4" />
-                Add
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              {objectKindRegistry.getAll().map((reg) => (
-                <DropdownMenuItem
-                  key={reg.kind}
-                  onClick={() => {
-                    const id = addObject(reg.kind)
-                    selectObject(id)
-                  }}
-                >
-                  {reg.label}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        {/*{isMobile && isEditView && (*/}
+        {/*  <DropdownMenu>*/}
+        {/*    <DropdownMenuTrigger asChild>*/}
+        {/*      <Button variant="ghost" size="sm" className="h-9 gap-1">*/}
+        {/*        <Plus className="h-4 w-4" />*/}
+        {/*        Add*/}
+        {/*      </Button>*/}
+        {/*    </DropdownMenuTrigger>*/}
+        {/*    <DropdownMenuContent>*/}
+        {/*      {objectKindRegistry.getAll().map((reg) => (*/}
+        {/*        <DropdownMenuItem*/}
+        {/*          key={reg.kind}*/}
+        {/*          onClick={() => {*/}
+        {/*            const id = addObject(reg.kind)*/}
+        {/*            selectObject(id)*/}
+        {/*          }}*/}
+        {/*        >*/}
+        {/*          {reg.label}*/}
+        {/*        </DropdownMenuItem>*/}
+        {/*      ))}*/}
+        {/*    </DropdownMenuContent>*/}
+        {/*  </DropdownMenu>*/}
+        {/*)}*/}
 
         {/* Spacer */}
-        <div className="flex-1" />
+        {/*<div className="flex-1" />*/}
 
         {/* Project name - desktop only */}
-        <span
-          className="hidden text-xs font-medium text-muted-foreground md:inline"
-          data-testid="project-name"
-        >
-          {currentProjectName}
-          {isDirty ? ' *' : ''}
-        </span>
+        {/*<span*/}
+        {/*  className="hidden text-xs font-medium text-muted-foreground md:inline"*/}
+        {/*  data-testid="project-name"*/}
+        {/*>*/}
+        {/*  {currentProjectName}*/}
+        {/*  {isDirty ? ' *' : ''}*/}
+        {/*</span>*/}
 
         {/* Spacer - desktop only */}
-        <div className="hidden flex-1 md:block" />
+        {/*<div className="hidden flex-1 md:block" />*/}
 
         {/* Export dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-9 gap-1 md:h-7">
-              <Download className="h-4 w-4" />
-              <span className="hidden md:inline">Export</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={handleExportSelected}
-              disabled={!singleSelectedId || !isEditView}
-            >
-              Export Selected (STL)
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={handleExportSelected3MF}
-              disabled={!singleSelectedId || !isEditView}
-            >
-              Export Selected (3MF)
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={() => {
-                setActiveView('printLayout')
-              }}
-              disabled={!isEditView}
-            >
-              Open Print Layout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {/*<DropdownMenu>*/}
+        {/*  <DropdownMenuTrigger asChild>*/}
+        {/*    <Button variant="ghost" size="sm" className="h-9 gap-1 md:h-7">*/}
+        {/*      <Download className="h-4 w-4" />*/}
+        {/*      <span className="hidden md:inline">Export</span>*/}
+        {/*    </Button>*/}
+        {/*  </DropdownMenuTrigger>*/}
+        {/*  <DropdownMenuContent align="end">*/}
+        {/*    <DropdownMenuItem*/}
+        {/*      onClick={handleExportSelected}*/}
+        {/*      disabled={!singleSelectedId || !isEditView}*/}
+        {/*    >*/}
+        {/*      Export Selected (STL)*/}
+        {/*    </DropdownMenuItem>*/}
+        {/*    <DropdownMenuItem*/}
+        {/*      onClick={handleExportSelected3MF}*/}
+        {/*      disabled={!singleSelectedId || !isEditView}*/}
+        {/*    >*/}
+        {/*      Export Selected (3MF)*/}
+        {/*    </DropdownMenuItem>*/}
+        {/*    <DropdownMenuSeparator />*/}
+        {/*    <DropdownMenuItem*/}
+        {/*      onClick={() => {*/}
+        {/*        setActiveView('printLayout')*/}
+        {/*      }}*/}
+        {/*      disabled={!isEditView}*/}
+        {/*    >*/}
+        {/*      Open Print Layout*/}
+        {/*    </DropdownMenuItem>*/}
+        {/*  </DropdownMenuContent>*/}
+        {/*</DropdownMenu>*/}
 
         {/* Viewport settings - desktop only */}
-        {!isMobile && isEditView && (
-          <>
-            <div className="h-5 w-px bg-border" />
-            <ViewportSettings />
-          </>
-        )}
+        {/*{!isMobile && isEditView && (*/}
+        {/*  <>*/}
+        {/*    <div className="h-5 w-px bg-border" />*/}
+        {/*    <ViewportSettings />*/}
+        {/*  </>*/}
+        {/*)}*/}
 
         {/* Overflow menu - mobile only */}
         {isMobile && (

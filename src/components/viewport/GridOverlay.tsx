@@ -7,13 +7,13 @@ export function GridOverlay() {
       cellSize={42}
       cellThickness={0.6}
       cellColor="#404040"
-      sectionSize={42 * 3}
+      sectionSize={0}
       sectionThickness={1}
       sectionColor="#606060"
       fadeDistance={800}
       fadeStrength={1}
       followCamera={false}
-      infiniteGrid
+      infiniteGrid={false}
       position={[0, -0.01, 0]}
     />
   )

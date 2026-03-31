@@ -78,6 +78,8 @@ export function TransformGizmo({ target, objectId }: TransformGizmoProps) {
     gridDepth,
   ])
 
+  console.log(gridSize);
+
   return (
     <TransformControls
       ref={controlsRef}
