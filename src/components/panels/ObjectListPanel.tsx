@@ -49,14 +49,14 @@ export function ObjectListPanel() {
     <div className="flex h-full flex-col">
       <div className="flex h-9 items-center border-b border-border px-3">
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Objects
+          Объекты
         </span>
       </div>
       <ScrollArea className="flex-1">
         <div className="p-1">
           {objects.length === 0 ? (
             <div className="px-3 py-8 text-center text-xs text-muted-foreground">
-              No objects yet. Use "Add Object" to get started.
+              Пока нет объектов. Добавьте объект чтобы начать.
             </div>
           ) : (
             <div role="listbox" aria-label="Object list">

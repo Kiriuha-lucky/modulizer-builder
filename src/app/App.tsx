@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import { Toaster } from 'sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { Layout } from './Layout'
 import { useProjectManagerStore } from '@/store/projectManagerStore'
+import {  Box } from '@chakra-ui/react'
+import { Toaster } from '@/components/ui/toaster.tsx'
 
 export function App() {
   const initializeProject = useProjectManagerStore((s) => s.initializeProject)
@@ -13,10 +14,10 @@ export function App() {
 
   return (
     <TooltipProvider>
-      <div className="dark h-full">
+      <Box h={'full'} w={'full'}>
         <Layout />
-        <Toaster theme="dark" position="bottom-right" richColors />
-      </div>
+        <Toaster  />
+      </Box>
     </TooltipProvider>
   )
 }
