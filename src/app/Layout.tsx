@@ -16,8 +16,8 @@ import {
 import { useUIStore } from '@/store/uiStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { cn } from '@/lib/utils';
-import { Box, Flex, Show } from '@chakra-ui/react';
+import { Box, Grid, Flex, Show } from '@chakra-ui/react';
+import { Header } from '@/components/header/Header.tsx';
 
 export function Layout() {
 	const leftPanelOpen = useUIStore((s) => s.leftPanelOpen);
@@ -51,37 +51,44 @@ export function Layout() {
 	}, [isMobile, setLeftPanelOpen, setRightPanelOpen]);
 
 	return (
-		<Flex w={'full'} h={'full'} flexDir={'column'}>
+		<Grid
+			gridTemplateRows={'72px 45px 1fr'}
+			w={'full'}
+			h={'full'}
+			flexDir={'column'}
+			position={'relative'}
+			overflow={'hidden'}
+		>
+			<Header />
 			{/* Toolbar */}
 			<Toolbar />
 
 			{/* Main content area */}
 			<Show when={isEditView}>
-				<Flex w={'full'} h={'full'}>
+				<Grid
+					gridTemplateColumns={'300px 1fr 300px'}
+					position="relative"
+					h="100%"
+					minH={0}
+					overflow="hidden"
+				>
 					{/* Desktop: Left panel - Object list */}
 					<Show when={!isMobile && leftPanelOpen}>
 						<ObjectListPanel />
 					</Show>
 
 					{/* Center - 3D Viewport */}
-					<div className="flex-1">
+					<Box w={'full'}>
 						<ViewportErrorBoundary key={activeView}>
 							<Viewport />
 						</ViewportErrorBoundary>
-					</div>
+					</Box>
 
 					{/* Desktop: Right panel - Properties */}
-					{!isMobile && (
-						<div
-							className={cn(
-								'border-l border-border bg-background transition-all duration-200 motion-reduce:transition-none',
-								rightPanelOpen ? 'w-72' : 'w-0'
-							)}
-						>
-							{rightPanelOpen && <PropertiesPanel />}
-						</div>
-					)}
-				</Flex>
+					<Show when={!isMobile && rightPanelOpen}>
+						<PropertiesPanel />
+					</Show>
+				</Grid>
 
 				{/*Mobile: Left panel as sheet overlay */}
 				{isMobile && (
@@ -160,6 +167,6 @@ export function Layout() {
 					{/*)}*/}
 				</PrintLayoutProvider>
 			</Show>
-		</Flex>
+		</Grid>
 	);
 }

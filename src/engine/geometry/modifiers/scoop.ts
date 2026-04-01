@@ -1,79 +1,108 @@
-import { BufferGeometry, CylinderGeometry } from 'three'
+import { BufferGeometry, ExtrudeGeometry, Shape, Vector2 } from 'three';
 
-import type { ScoopModifierParams, ModifierContext, GridfinityProfile } from '@/types/gridfinity'
+import type {
+	ScoopModifierParams,
+	ModifierContext,
+	GridfinityProfile,
+} from '@/types/gridfinity';
 
-import { mergeGeometries, getCurveSegments } from '../primitives'
+import { getCurveSegments } from '../primitives';
+
+function createScoopProfile(radius: number, segments: number): Shape {
+	const r = radius;
+	const points: Vector2[] = [];
+
+	// Профиль вогнутой выемки:
+	// x = от стенки внутрь
+	// y = от пола вверх
+	points.push(new Vector2(0, 0));
+	points.push(new Vector2(r, 0));
+
+	for (let i = 0; i <= segments; i++) {
+		const t = i / segments;
+		const angle = -Math.PI / 2 - (Math.PI / 2) * t;
+		const x = r + Math.cos(angle) * r;
+		const y = r + Math.sin(angle) * r;
+		points.push(new Vector2(x, y));
+	}
+
+	points.push(new Vector2(0, r));
+	points.push(new Vector2(0, 0));
+
+	return new Shape(points);
+}
 
 export function generateScoop(
-  params: ScoopModifierParams,
-  context: ModifierContext,
-  _profile: GridfinityProfile,
+	params: ScoopModifierParams,
+	context: ModifierContext,
+	_profile: GridfinityProfile
 ): BufferGeometry {
-  const { wall, radius: explicitRadius } = params
-  const { innerWidth, innerDepth, wallHeight, floorY, centerX, centerZ } = context
+	const { wall, radius: explicitRadius } = params;
+	const { innerWidth, innerDepth, wallHeight, floorY, centerX, centerZ } =
+		context;
 
-  if (wallHeight <= 0) return new BufferGeometry()
+	if (wallHeight <= 0) return new BufferGeometry();
 
-  // Auto-calculate radius if 0
-  const radius = explicitRadius > 0 ? explicitRadius : wallHeight * 0.4
-  const clampedRadius = Math.min(radius, wallHeight * 0.9)
+	const isFrontBack = wall === 'front' || wall === 'back';
+	const span = isFrontBack ? innerWidth : innerDepth;
 
-  if (clampedRadius <= 0) return new BufferGeometry()
+	if (span <= 0) return new BufferGeometry();
 
-  // Create half-cylinder geometry
-  const isXWall = wall === 'front' || wall === 'back'
-  const span = isXWall ? innerWidth : innerDepth
+	const radius = explicitRadius > 0 ? explicitRadius : wallHeight * 0.35;
+	const r = Math.min(radius, wallHeight * 0.8, span * 0.25);
 
-  if (span <= 0) return new BufferGeometry()
+	if (r <= 0) return new BufferGeometry();
 
-  const segments = getCurveSegments() * 2
+	const curveSegments = Math.max(16, getCurveSegments() * 2);
+	const shape = createScoopProfile(r, curveSegments);
 
-  // Build a half-cylinder as a custom geometry
-  const geo = new CylinderGeometry(
-    clampedRadius,
-    clampedRadius,
-    span,
-    segments,
-    1,
-    false,
-    0,
-    Math.PI,
-  )
+	const geo = new ExtrudeGeometry(shape, {
+		depth: span,
+		bevelEnabled: false,
+		curveSegments,
+		steps: 1,
+	});
 
-  // Orient and position based on wall
-  switch (wall) {
-    case 'front': {
-      // Axis Y→X via rotateZ. Arc faces +Z (inward). No rotateY needed.
-      geo.rotateZ(Math.PI / 2)
-      geo.translate(centerX, floorY + clampedRadius, centerZ - innerDepth / 2 + clampedRadius)
-      break
-    }
-    case 'back': {
-      // Axis Y→X. rotateX(PI) flips arc to face -Z (inward from back wall).
-      geo.rotateZ(Math.PI / 2)
-      geo.rotateX(Math.PI)
-      geo.translate(centerX, floorY + clampedRadius, centerZ + innerDepth / 2 - clampedRadius)
-      break
-    }
-    case 'left': {
-      // Axis Y→Z via rotateZ+rotateY(-PI/2). Arc faces +X (inward from left wall).
-      geo.rotateZ(Math.PI / 2)
-      geo.rotateY(-Math.PI / 2)
-      geo.translate(centerX - innerWidth / 2 + clampedRadius, floorY + clampedRadius, centerZ)
-      break
-    }
-    case 'right': {
-      // Axis Y→Z via rotateZ+rotateY(PI/2). Arc faces -X (inward from right wall).
-      geo.rotateZ(Math.PI / 2)
-      geo.rotateY(Math.PI / 2)
-      geo.translate(centerX + innerWidth / 2 - clampedRadius, floorY + clampedRadius, centerZ)
-      break
-    }
-  }
+	// От 0..span в симметричный диапазон -span/2..+span/2
+	geo.translate(0, 0, -span / 2);
 
-  const geometries = [geo]
-  const result = mergeGeometries(geometries)
-  for (const g of geometries) g.dispose()
+	switch (wall) {
+		case 'front': {
+			// x -> внутрь по +Z
+			// y -> вверх по +Y
+			// z -> вдоль X
+			geo.rotateY(-Math.PI / 2);
+			geo.translate(centerX, floorY, centerZ - innerDepth / 2);
+			break;
+		}
 
-  return result
+		case 'back': {
+			// x -> внутрь по -Z
+			// y -> вверх по +Y
+			// z -> вдоль X
+			geo.rotateY(Math.PI / 2);
+			geo.translate(centerX, floorY, centerZ + innerDepth / 2);
+			break;
+		}
+
+		case 'left': {
+			// x -> внутрь по +X
+			// y -> вверх по +Y
+			// z -> вдоль Z
+			geo.translate(centerX - innerWidth / 2, floorY, centerZ);
+			break;
+		}
+
+		case 'right': {
+			// x -> внутрь по -X
+			// y -> вверх по +Y
+			// z -> вдоль Z
+			geo.rotateY(Math.PI);
+			geo.translate(centerX + innerWidth / 2, floorY, centerZ);
+			break;
+		}
+	}
+
+	geo.computeVertexNormals();
+	return geo;
 }

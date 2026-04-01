@@ -333,37 +333,6 @@ export function Toolbar() {
 				{/* Edit view controls - desktop */}
 				{!isMobile && isEditView && (
 					<>
-						{/*Add object dropdown */}
-						<Menu.Root>
-							<Menu.Trigger>
-								<Button
-									variant="solid"
-									size="sm"
-									colorPalette={'gray'}
-								>
-									<Plus className="h-4 w-4" />
-									Добавить объект
-								</Button>
-							</Menu.Trigger>
-
-							<Menu.Positioner>
-								<Menu.Content>
-									{objectKindRegistry.getAll().map((reg) => (
-										<Menu.Item
-											key={reg.kind}
-											onClick={() => {
-												const id = addObject(reg.kind);
-												selectObject(id);
-											}}
-											value={reg.label}
-										>
-											{reg.label}
-										</Menu.Item>
-									))}
-								</Menu.Content>
-							</Menu.Positioner>
-						</Menu.Root>
-
 						{/*<div className="h-5 w-px bg-border" />*/}
 
 						{/* Camera presets */}
@@ -433,37 +402,41 @@ export function Toolbar() {
 				{/*<div className="hidden flex-1 md:block" />*/}
 
 				{/* Export dropdown */}
-				{/*<DropdownMenu>*/}
-				{/*  <DropdownMenuTrigger asChild>*/}
-				{/*    <Button variant="ghost" size="sm" className="h-9 gap-1 md:h-7">*/}
-				{/*      <Download className="h-4 w-4" />*/}
-				{/*      <span className="hidden md:inline">Export</span>*/}
-				{/*    </Button>*/}
-				{/*  </DropdownMenuTrigger>*/}
-				{/*  <DropdownMenuContent align="end">*/}
-				{/*    <DropdownMenuItem*/}
-				{/*      onClick={handleExportSelected}*/}
-				{/*      disabled={!singleSelectedId || !isEditView}*/}
-				{/*    >*/}
-				{/*      Export Selected (STL)*/}
-				{/*    </DropdownMenuItem>*/}
-				{/*    <DropdownMenuItem*/}
-				{/*      onClick={handleExportSelected3MF}*/}
-				{/*      disabled={!singleSelectedId || !isEditView}*/}
-				{/*    >*/}
-				{/*      Export Selected (3MF)*/}
-				{/*    </DropdownMenuItem>*/}
-				{/*    <DropdownMenuSeparator />*/}
-				{/*    <DropdownMenuItem*/}
-				{/*      onClick={() => {*/}
-				{/*        setActiveView('printLayout')*/}
-				{/*      }}*/}
-				{/*      disabled={!isEditView}*/}
-				{/*    >*/}
-				{/*      Open Print Layout*/}
-				{/*    </DropdownMenuItem>*/}
-				{/*  </DropdownMenuContent>*/}
-				{/*</DropdownMenu>*/}
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button
+							variant="ghost"
+							size="sm"
+							className="h-9 gap-1 md:h-7"
+						>
+							<Download className="h-4 w-4" />
+							<span className="hidden md:inline">Export</span>
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end">
+						<DropdownMenuItem
+							onClick={handleExportSelected}
+							disabled={!singleSelectedId || !isEditView}
+						>
+							Export Selected (STL)
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							onClick={handleExportSelected3MF}
+							disabled={!singleSelectedId || !isEditView}
+						>
+							Export Selected (3MF)
+						</DropdownMenuItem>
+						<DropdownMenuSeparator />
+						<DropdownMenuItem
+							onClick={() => {
+								setActiveView('printLayout');
+							}}
+							disabled={!isEditView}
+						>
+							Open Print Layout
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 
 				{/* Viewport settings - desktop only */}
 				{/*{!isMobile && isEditView && (*/}

@@ -1,217 +1,566 @@
-import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
-import { Switch } from '@/components/ui/switch'
-import { Separator } from '@/components/ui/separator'
-import { ProfileSelector } from './ProfileSelector'
-import { ModifierSection } from './ModifierSection'
-import type { BinObject } from '@/types/gridfinity'
-import { useProjectStore } from '@/store/projectStore'
-import { useProfileStore } from '@/store/profileStore'
-import { getBinDimensions } from '@/engine/geometry/bin'
+import { ModifierSection } from './ModifierSection';
+import type { BinObject } from '@/types/gridfinity';
+import { useProjectStore } from '@/store/projectStore';
+import { useProfileStore } from '@/store/profileStore';
+import { getBinDimensions } from '@/engine/geometry/bin';
+import {
+	Flex,
+	Heading,
+	HStack,
+	Slider,
+	Switch,
+	Text,
+	Box,
+} from '@chakra-ui/react';
 
 interface BinPropertiesProps {
-  object: BinObject
+	object: BinObject;
 }
 
 export function BinProperties({ object }: BinPropertiesProps) {
-  const updateObjectParams = useProjectStore((s) => s.updateObjectParams)
-  const activeProfile = useProfileStore((s) => s.activeProfile)
-  const dims = getBinDimensions(object.params, activeProfile)
+	const updateObjectParams = useProjectStore((s) => s.updateObjectParams);
+	const activeProfile = useProfileStore((s) => s.activeProfile);
+	const dims = getBinDimensions(object.params, activeProfile);
 
-  return (
-    <div className="space-y-4">
-      <ProfileSelector />
+	return (
+		<Flex direction="column" gap={3}>
+			<Box
+				p="14px"
+				borderRadius="18px"
+				bg="rgba(255,255,255,0.46)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.55)"
+			>
+				<Text
+					fontSize="10px"
+					fontWeight="700"
+					color="gray.500"
+					textTransform="uppercase"
+					letterSpacing="0.08em"
+					mb="4px"
+				>
+					Габаритные размеры
+				</Text>
+				<Heading
+					size="md"
+					fontWeight="800"
+					letterSpacing="-0.03em"
+					color="gray.900"
+					lineHeight="1.1"
+				>
+					{dims.width} x {dims.depth} x {dims.height} mm
+				</Heading>
+			</Box>
 
-      <Separator />
+			{/*<ProfileSelector />*/}
 
-      {/* Grid Width */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bin-grid-width" className="text-xs">
-            Grid Width
-          </Label>
-          <span className="text-xs tabular-nums text-muted-foreground">
-            {object.params.gridWidth}u ({dims.width}mm)
-          </span>
-        </div>
-        <Slider
-          id="bin-grid-width"
-          value={[object.params.gridWidth]}
-          onValueChange={([v]) => {
-            updateObjectParams(object.id, { gridWidth: v })
-          }}
-          min={1}
-          max={10}
-          step={1}
-        />
-      </div>
+			{/* Grid Width */}
+			<Box
+				p="12px"
+				borderRadius="16px"
+				bg="rgba(255,255,255,0.40)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.5)"
+			>
+				<Slider.Root
+					id="bin-grid-width"
+					min={1}
+					max={6}
+					step={1}
+					w="full"
+					value={[object.params.gridWidth]}
+					onValueChange={(e) =>
+						updateObjectParams(object.id, {
+							gridWidth: e?.value?.[0],
+						})
+					}
+				>
+					<HStack
+						alignItems="center"
+						w="full"
+						justifyContent="space-between"
+						mb="8px"
+					>
+						<Slider.Label
+							fontSize="12px"
+							fontWeight="700"
+							color="gray.800"
+							letterSpacing="-0.01em"
+						>
+							Ширина модуля
+						</Slider.Label>
+						<Flex
+							fontSize="11px"
+							fontWeight="700"
+							color="gray.500"
+							bg="rgba(255,255,255,0.72)"
+							border="1px solid"
+							borderColor="blackAlpha.100"
+							borderRadius="full"
+							px="8px"
+							h="24px"
+							align="center"
+							gap="4px"
+							boxShadow="inset 0 1px 0 rgba(255,255,255,0.55)"
+							whiteSpace="nowrap"
+						>
+							<Slider.ValueText />({dims.width}mm)
+						</Flex>
+					</HStack>
+					<Slider.Control>
+						<Slider.Track
+							h="6px"
+							borderRadius="full"
+							bg="rgba(15,23,42,0.08)"
+							boxShadow="inset 0 1px 2px rgba(15,23,42,0.08)"
+						>
+							<Slider.Range
+								bg="linear-gradient(90deg, #2563eb 0%, #60a5fa 100%)"
+								borderRadius="full"
+							/>
+						</Slider.Track>
+						<Slider.Thumbs />
+					</Slider.Control>
+				</Slider.Root>
+			</Box>
 
-      {/* Grid Depth */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bin-grid-depth" className="text-xs">
-            Grid Depth
-          </Label>
-          <span className="text-xs tabular-nums text-muted-foreground">
-            {object.params.gridDepth}u ({dims.depth}mm)
-          </span>
-        </div>
-        <Slider
-          id="bin-grid-depth"
-          value={[object.params.gridDepth]}
-          onValueChange={([v]) => {
-            updateObjectParams(object.id, { gridDepth: v })
-          }}
-          min={1}
-          max={10}
-          step={1}
-        />
-      </div>
+			{/* Grid Depth */}
+			<Box
+				p="12px"
+				borderRadius="16px"
+				bg="rgba(255,255,255,0.40)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.5)"
+			>
+				<Slider.Root
+					id="bin-grid-depth"
+					min={1}
+					max={6}
+					step={1}
+					w="full"
+					value={[object.params.gridDepth]}
+					onValueChange={(e) =>
+						updateObjectParams(object.id, {
+							gridDepth: e?.value?.[0],
+						})
+					}
+				>
+					<HStack
+						alignItems="center"
+						w="full"
+						justifyContent="space-between"
+						mb="8px"
+					>
+						<Slider.Label
+							fontSize="12px"
+							fontWeight="700"
+							color="gray.800"
+							letterSpacing="-0.01em"
+						>
+							Длина модуля
+						</Slider.Label>
+						<Flex
+							fontSize="11px"
+							fontWeight="700"
+							color="gray.500"
+							bg="rgba(255,255,255,0.72)"
+							border="1px solid"
+							borderColor="blackAlpha.100"
+							borderRadius="full"
+							px="8px"
+							h="24px"
+							align="center"
+							gap="4px"
+							boxShadow="inset 0 1px 0 rgba(255,255,255,0.55)"
+							whiteSpace="nowrap"
+						>
+							<Slider.ValueText />({dims.depth}mm)
+						</Flex>
+					</HStack>
+					<Slider.Control>
+						<Slider.Track
+							h="6px"
+							borderRadius="full"
+							bg="rgba(15,23,42,0.08)"
+							boxShadow="inset 0 1px 2px rgba(15,23,42,0.08)"
+						>
+							<Slider.Range
+								bg="linear-gradient(90deg, #2563eb 0%, #60a5fa 100%)"
+								borderRadius="full"
+							/>
+						</Slider.Track>
+						<Slider.Thumbs />
+					</Slider.Control>
+				</Slider.Root>
+			</Box>
 
-      {/* Height Units */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bin-height" className="text-xs">
-            Height
-          </Label>
-          <span className="text-xs tabular-nums text-muted-foreground">
-            {object.params.heightUnits}u ({dims.height}mm)
-          </span>
-        </div>
-        <Slider
-          id="bin-height"
-          value={[object.params.heightUnits]}
-          onValueChange={([v]) => {
-            updateObjectParams(object.id, { heightUnits: v })
-          }}
-          min={1}
-          max={10}
-          step={1}
-        />
-      </div>
+			{/* Height Units */}
+			<Box
+				p="12px"
+				borderRadius="16px"
+				bg="rgba(255,255,255,0.40)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.5)"
+			>
+				<Slider.Root
+					id="bin-grid-depth"
+					min={1}
+					max={30}
+					step={1}
+					w="full"
+					value={[object.params.heightUnits]}
+					onValueChange={(e) =>
+						updateObjectParams(object.id, {
+							heightUnits: e?.value?.[0],
+						})
+					}
+				>
+					<HStack
+						alignItems="center"
+						w="full"
+						justifyContent="space-between"
+						mb="8px"
+					>
+						<Slider.Label
+							fontSize="12px"
+							fontWeight="700"
+							color="gray.800"
+							letterSpacing="-0.01em"
+						>
+							Высота модуля
+						</Slider.Label>
+						<Flex
+							fontSize="11px"
+							fontWeight="700"
+							color="gray.500"
+							bg="rgba(255,255,255,0.72)"
+							border="1px solid"
+							borderColor="blackAlpha.100"
+							borderRadius="full"
+							px="8px"
+							h="24px"
+							align="center"
+							gap="4px"
+							boxShadow="inset 0 1px 0 rgba(255,255,255,0.55)"
+							whiteSpace="nowrap"
+						>
+							<Slider.ValueText />({dims.height}mm)
+						</Flex>
+					</HStack>
+					<Slider.Control>
+						<Slider.Track
+							h="6px"
+							borderRadius="full"
+							bg="rgba(15,23,42,0.08)"
+							boxShadow="inset 0 1px 2px rgba(15,23,42,0.08)"
+						>
+							<Slider.Range
+								bg="linear-gradient(90deg, #2563eb 0%, #60a5fa 100%)"
+								borderRadius="full"
+							/>
+						</Slider.Track>
+						<Slider.Thumbs />
+					</Slider.Control>
+				</Slider.Root>
+			</Box>
 
-      <Separator />
+			{/* Stacking Lip */}
+			<Box
+				p="12px"
+				borderRadius="16px"
+				bg="rgba(255,255,255,0.40)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.5)"
+			>
+				<Switch.Root
+					id="bin-stacking-lip"
+					checked={object.params.stackingLip}
+					onCheckedChange={(e) =>
+						updateObjectParams(object.id, {
+							stackingLip: e.checked,
+						})
+					}
+					display="flex"
+					alignItems="center"
+					justifyContent="space-between"
+					w="full"
+				>
+					<Switch.Label
+						fontSize="12px"
+						fontWeight="700"
+						color="gray.800"
+						letterSpacing="-0.01em"
+					>
+						Стыковочный бортик
+					</Switch.Label>
+					<Flex align="center" gap={2}>
+						<Switch.HiddenInput />
+						<Switch.Control>
+							<Switch.Thumb />
+						</Switch.Control>
+					</Flex>
+				</Switch.Root>
+			</Box>
 
-      {/* Stacking Lip */}
-      <div className="flex items-center justify-between">
-        <Label htmlFor="bin-stacking-lip" className="text-xs">
-          Stacking Lip
-        </Label>
-        <Switch
-          id="bin-stacking-lip"
-          checked={object.params.stackingLip}
-          onCheckedChange={(checked) => {
-            updateObjectParams(object.id, { stackingLip: checked })
-          }}
-        />
-      </div>
+			{/* Wall Thickness */}
+			<Box
+				p="12px"
+				borderRadius="16px"
+				bg="rgba(255,255,255,0.40)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.5)"
+			>
+				<Slider.Root
+					id="bin-wall-thickness"
+					min={0.4}
+					max={3}
+					step={0.1}
+					w="full"
+					value={[+object.params.wallThickness.toFixed(1)]}
+					onValueChange={(e) =>
+						updateObjectParams(object.id, {
+							wallThickness: Math.round(e?.value?.[0] * 10) / 10,
+						})
+					}
+				>
+					<HStack
+						alignItems="center"
+						w="full"
+						justifyContent="space-between"
+						mb="8px"
+					>
+						<Slider.Label
+							fontSize="12px"
+							fontWeight="700"
+							color="gray.800"
+							letterSpacing="-0.01em"
+						>
+							Толщина стенок
+						</Slider.Label>
+						<Flex
+							fontSize="11px"
+							fontWeight="700"
+							color="gray.500"
+							bg="rgba(255,255,255,0.72)"
+							border="1px solid"
+							borderColor="blackAlpha.100"
+							borderRadius="full"
+							px="8px"
+							h="24px"
+							align="center"
+							gap="4px"
+							boxShadow="inset 0 1px 0 rgba(255,255,255,0.55)"
+							whiteSpace="nowrap"
+						>
+							<Slider.ValueText />(
+							{object.params.wallThickness.toFixed(1)}mm)
+						</Flex>
+					</HStack>
+					<Slider.Control>
+						<Slider.Track
+							h="6px"
+							borderRadius="full"
+							bg="rgba(15,23,42,0.08)"
+							boxShadow="inset 0 1px 2px rgba(15,23,42,0.08)"
+						>
+							<Slider.Range
+								bg="linear-gradient(90deg, #2563eb 0%, #60a5fa 100%)"
+								borderRadius="full"
+							/>
+						</Slider.Track>
+						<Slider.Thumbs />
+					</Slider.Control>
+				</Slider.Root>
+			</Box>
 
-      {/* Wall Thickness */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bin-wall-thickness" className="text-xs">
-            Wall Thickness
-          </Label>
-          <span className="text-xs tabular-nums text-muted-foreground">
-            {object.params.wallThickness.toFixed(1)}mm
-          </span>
-        </div>
-        <Slider
-          id="bin-wall-thickness"
-          value={[object.params.wallThickness]}
-          onValueChange={([v]) => {
-            updateObjectParams(object.id, { wallThickness: Math.round(v * 10) / 10 })
-          }}
-          min={0.4}
-          max={3.0}
-          step={0.1}
-        />
-      </div>
+			{/* Inner Fillet */}
+			<Box
+				p="12px"
+				borderRadius="16px"
+				bg="rgba(255,255,255,0.40)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.5)"
+			>
+				<Slider.Root
+					id="bin-inner-fillet"
+					min={0}
+					max={3}
+					step={0.5}
+					w="full"
+					value={[object.params.innerFillet]}
+					onValueChange={(e) => {
+						return updateObjectParams(object.id, {
+							innerFillet: Math.round(e?.value?.[0] * 10) / 10,
+						});
+					}}
+				>
+					<HStack
+						alignItems="center"
+						w="full"
+						justifyContent="space-between"
+						mb="8px"
+					>
+						<Slider.Label
+							fontSize="12px"
+							fontWeight="700"
+							color="gray.800"
+							letterSpacing="-0.01em"
+						>
+							Внешнее скругление
+						</Slider.Label>
+						<Flex
+							fontSize="11px"
+							fontWeight="700"
+							color="gray.500"
+							bg="rgba(255,255,255,0.72)"
+							border="1px solid"
+							borderColor="blackAlpha.100"
+							borderRadius="full"
+							px="8px"
+							h="24px"
+							align="center"
+							gap="4px"
+							boxShadow="inset 0 1px 0 rgba(255,255,255,0.55)"
+							whiteSpace="nowrap"
+						>
+							<Slider.ValueText />(
+							{object.params.innerFillet === 0
+								? 'None'
+								: `${object.params.innerFillet.toFixed(1)}mm`}
+							)
+						</Flex>
+					</HStack>
+					<Slider.Control>
+						<Slider.Track
+							h="6px"
+							borderRadius="full"
+							bg="rgba(15,23,42,0.08)"
+							boxShadow="inset 0 1px 2px rgba(15,23,42,0.08)"
+						>
+							<Slider.Range
+								bg="linear-gradient(90deg, #2563eb 0%, #60a5fa 100%)"
+								borderRadius="full"
+							/>
+						</Slider.Track>
+						<Slider.Thumbs />
+					</Slider.Control>
+				</Slider.Root>
+			</Box>
 
-      {/* Inner Fillet */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="bin-inner-fillet" className="text-xs">
-            Inner Fillet
-          </Label>
-          <span className="text-xs tabular-nums text-muted-foreground">
-            {object.params.innerFillet === 0 ? 'None' : `${object.params.innerFillet.toFixed(1)}mm`}
-          </span>
-        </div>
-        <Slider
-          id="bin-inner-fillet"
-          value={[object.params.innerFillet]}
-          onValueChange={([v]) => {
-            updateObjectParams(object.id, { innerFillet: Math.round(v * 10) / 10 })
-          }}
-          min={0}
-          max={3.0}
-          step={0.5}
-        />
-      </div>
+			{/* Base Options */}
+			<Heading
+				size="md"
+				fontWeight="800"
+				letterSpacing="-0.03em"
+				color="gray.900"
+				mt={1}
+				mb={-1}
+			>
+				Настройки базы модуля
+			</Heading>
 
-      <Separator />
+			{/* Magnet Holes */}
+			<Box
+				p="12px"
+				borderRadius="16px"
+				bg="rgba(255,255,255,0.40)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.5)"
+			>
+				<Switch.Root
+					id="bin-magnet-holes"
+					checked={object.params.magnetHoles}
+					onCheckedChange={(e) =>
+						updateObjectParams(object.id, {
+							magnetHoles: e.checked,
+						})
+					}
+					display="flex"
+					alignItems="center"
+					justifyContent="space-between"
+					w="full"
+				>
+					<Switch.Label
+						fontSize="12px"
+						fontWeight="700"
+						color="gray.800"
+						letterSpacing="-0.01em"
+					>
+						Отверстия под магниты
+					</Switch.Label>
+					<Flex align="center" gap={2}>
+						<Switch.HiddenInput />
+						<Switch.Control>
+							<Switch.Thumb />
+						</Switch.Control>
+					</Flex>
+				</Switch.Root>
+			</Box>
 
-      {/* Base Options */}
-      <Label className="text-xs text-muted-foreground">Base Options</Label>
+			{/* Weight Holes */}
+			<Box
+				p="12px"
+				borderRadius="16px"
+				bg="rgba(255,255,255,0.40)"
+				border="1px solid"
+				borderColor="whiteAlpha.400"
+				boxShadow="inset 0 1px 0 rgba(255,255,255,0.5)"
+			>
+				<Switch.Root
+					id="bin-weight-holes"
+					checked={object.params.weightHoles}
+					onCheckedChange={(e) =>
+						updateObjectParams(object.id, {
+							weightHoles: e.checked,
+						})
+					}
+					display="flex"
+					alignItems="center"
+					justifyContent="space-between"
+					w="full"
+				>
+					<Switch.Label
+						fontSize="12px"
+						fontWeight="700"
+						color="gray.800"
+						letterSpacing="-0.01em"
+					>
+						Отверстия под утяжелитель
+					</Switch.Label>
+					<Flex align="center" gap={2}>
+						<Switch.HiddenInput />
+						<Switch.Control>
+							<Switch.Thumb />
+						</Switch.Control>
+					</Flex>
+				</Switch.Root>
+			</Box>
 
-      {/* Magnet Holes */}
-      <div className="flex items-center justify-between">
-        <Label htmlFor="bin-magnet-holes" className="text-xs">
-          Magnet Holes
-        </Label>
-        <Switch
-          id="bin-magnet-holes"
-          checked={object.params.magnetHoles}
-          onCheckedChange={(checked) => {
-            updateObjectParams(object.id, { magnetHoles: checked })
-          }}
-        />
-      </div>
+			{/* Honeycomb Base */}
+			{/*<div className="flex items-center justify-between">*/}
+			{/*  <Label htmlFor="bin-honeycomb-base" className="text-xs">*/}
+			{/*    Honeycomb Base*/}
+			{/*  </Label>*/}
+			{/*  <Switch1*/}
+			{/*    id="bin-honeycomb-base"*/}
+			{/*    checked={object.params.honeycombBase}*/}
+			{/*    onCheckedChange={(checked) => {*/}
+			{/*      updateObjectParams(object.id, {*/}
+			{/*        honeycombBase: checked,*/}
+			{/*      });*/}
+			{/*    }}*/}
+			{/*  />*/}
+			{/*</div>*/}
 
-      {/* Weight Holes */}
-      <div className="flex items-center justify-between">
-        <Label htmlFor="bin-weight-holes" className="text-xs">
-          Weight Holes
-        </Label>
-        <Switch
-          id="bin-weight-holes"
-          checked={object.params.weightHoles}
-          onCheckedChange={(checked) => {
-            updateObjectParams(object.id, { weightHoles: checked })
-          }}
-        />
-      </div>
-
-      {/* Honeycomb Base */}
-      <div className="flex items-center justify-between">
-        <Label htmlFor="bin-honeycomb-base" className="text-xs">
-          Honeycomb Base
-        </Label>
-        <Switch
-          id="bin-honeycomb-base"
-          checked={object.params.honeycombBase}
-          onCheckedChange={(checked) => {
-            updateObjectParams(object.id, { honeycombBase: checked })
-          }}
-        />
-      </div>
-
-      <Separator />
-
-      {/* Dimensions readout */}
-      <div className="space-y-1">
-        <Label className="text-xs text-muted-foreground">Dimensions</Label>
-        <div
-          className="rounded-md bg-muted px-3 py-2 text-xs tabular-nums"
-          data-testid="dimensions-readout"
-        >
-          {dims.width} x {dims.depth} x {dims.height} mm
-        </div>
-      </div>
-
-      {/* Modifiers */}
-      <ModifierSection parentId={object.id} />
-    </div>
-  )
+			<ModifierSection parentId={object.id} />
+		</Flex>
+	);
 }

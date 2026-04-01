@@ -1,125 +1,137 @@
 import type {
-  GridfinityProfile,
-  DividerGridModifierParams,
-  LabelTabModifierParams,
-  ScoopModifierParams,
-  InsertModifierParams,
-  LidModifierParams,
-  FingerScoopModifierParams,
-  OpenGridBoardParams,
-  PrintBedPreset,
-} from '@/types/gridfinity'
+	GridfinityProfile,
+	DividerGridModifierParams,
+	LabelTabModifierParams,
+	ScoopModifierParams,
+	InsertModifierParams,
+	LidModifierParams,
+	FingerScoopModifierParams,
+	OpenGridBoardParams,
+	PrintBedPreset,
+} from '@/types/gridfinity';
 
 export const PROFILE_OFFICIAL: GridfinityProfile = {
-  name: 'Official',
-  gridSize: 42,
-  heightUnit: 7,
-  baseplateHeight: 7,
-  binCornerRadius: 3.75,
-  baseplateCornerRadius: 4.0,
-  wallThickness: 1.2,
-  tolerance: 0.25,
-  magnetDiameter: 6.15,
-  magnetDepth: 2.0,
-  screwDiameter: 3.0,
-  heatSetDiameter: 4.2,
-  stackingLipHeight: 4.4,
-  socketWallHeight: 4.65,
-  socketBottomChamfer: 0.8,
-  socketMidHeight: 1.8,
-  socketTopHeight: 2.15,
-}
+	name: 'Official',
+	gridSize: 42,
+	heightUnit: 7,
+	baseplateHeight: 7,
+	binCornerRadius: 3.75,
+	baseplateCornerRadius: 4.0,
+	wallThickness: 1.2,
+	tolerance: 0.25,
+	magnetDiameter: 6.15,
+	magnetDepth: 2.0,
+	screwDiameter: 3.0,
+	heatSetDiameter: 4.2,
+	stackingLipHeight: 4.4,
+	socketWallHeight: 4.65,
+	socketBottomChamfer: 0.8,
+	socketMidHeight: 1.8,
+	socketTopHeight: 2.15,
+};
 
 export const PROFILE_TIGHT_FIT: GridfinityProfile = {
-  ...PROFILE_OFFICIAL,
-  name: 'Tight Fit',
-  tolerance: 0.1,
-  magnetDiameter: 6.05,
-}
+	...PROFILE_OFFICIAL,
+	name: 'Tight Fit',
+	tolerance: 0.1,
+	magnetDiameter: 6.05,
+};
 
 export const PROFILE_LOOSE_FIT: GridfinityProfile = {
-  ...PROFILE_OFFICIAL,
-  name: 'Loose Fit',
-  tolerance: 0.4,
-  magnetDiameter: 6.3,
-  heatSetDiameter: 4.4,
-}
+	...PROFILE_OFFICIAL,
+	name: 'Loose Fit',
+	tolerance: 0.4,
+	magnetDiameter: 6.3,
+	heatSetDiameter: 4.4,
+};
 
 export const DEFAULT_PROFILES: Record<string, GridfinityProfile> = {
-  official: PROFILE_OFFICIAL,
-  tightFit: PROFILE_TIGHT_FIT,
-  looseFit: PROFILE_LOOSE_FIT,
-}
+	official: PROFILE_OFFICIAL,
+	tightFit: PROFILE_TIGHT_FIT,
+	looseFit: PROFILE_LOOSE_FIT,
+};
 
 export const DEFAULT_BASEPLATE_PARAMS = {
-  gridWidth: 3,
-  gridDepth: 3,
-  slim: false,
-  magnetHoles: true,
-  screwHoles: false,
-} as const
+	gridWidth: 3,
+	gridDepth: 3,
+	slim: false,
+	magnetHoles: true,
+	screwHoles: false,
+} as const;
 
 export const DEFAULT_BIN_PARAMS = {
-  gridWidth: 1,
-  gridDepth: 1,
-  heightUnits: 3,
-  stackingLip: true,
-  wallThickness: 1.2,
-  innerFillet: 0,
-  magnetHoles: false,
-  weightHoles: false,
-  honeycombBase: false,
-} as const
+	gridWidth: 1,
+	gridDepth: 1,
+	heightUnits: 3,
+	stackingLip: true,
+	wallThickness: 1.2,
+	innerFillet: 0,
+	magnetHoles: false,
+	weightHoles: false,
+	honeycombBase: false,
+} as const;
 
 export const DEFAULT_DIVIDER_GRID_PARAMS: DividerGridModifierParams = {
-  dividersX: 1,
-  dividersY: 1,
-  wallThickness: 1.2,
-}
+	dividersX: 1,
+	dividersY: 1,
+	wallThickness: 1.2,
+};
 
 export const DEFAULT_LABEL_TAB_PARAMS: LabelTabModifierParams = {
-  wall: 'front',
-  angle: 45,
-  height: 7,
-}
+	wall: 'front',
+	angle: 45,
+	height: 7,
+};
 
 export const DEFAULT_SCOOP_PARAMS: ScoopModifierParams = {
-  wall: 'front',
-  radius: 0,
-}
+	wall: 'front',
+	radius: 1,
+};
 
 export const DEFAULT_INSERT_PARAMS: InsertModifierParams = {
-  compartmentsX: 2,
-  compartmentsY: 2,
-  wallThickness: 1.2,
-}
+	compartmentsX: 2,
+	compartmentsY: 2,
+	wallThickness: 1.2,
+};
 
 export const DEFAULT_LID_PARAMS: LidModifierParams = {
-  stacking: false,
-}
+	stacking: false,
+};
 
 export const DEFAULT_FINGER_SCOOP_PARAMS: FingerScoopModifierParams = {
-  wall: 'front',
-  width: 20,
-  depth: 15,
-}
+	wall: 'front',
+	width: 20,
+	depth: 15,
+};
 
 // OpenGrid constants (separate system from Gridfinity)
-export const OPENGRID_GRID_SIZE = 28 // mm per grid unit
-export const OPENGRID_FULL_THICKNESS = 6.8 // mm
-export const OPENGRID_LITE_THICKNESS = 4.0 // mm
-export const OPENGRID_HOLE_SIZE = 11 // mm, diamond point-to-point
-export const OPENGRID_CORNER_RADIUS = 2 // mm
+export const OPENGRID_GRID_SIZE = 28; // mm per grid unit
+export const OPENGRID_FULL_THICKNESS = 6.8; // mm
+export const OPENGRID_LITE_THICKNESS = 4.0; // mm
+export const OPENGRID_HOLE_SIZE = 11; // mm, diamond point-to-point
+export const OPENGRID_CORNER_RADIUS = 2; // mm
 
 export const DEFAULT_OPENGRID_BOARD_PARAMS: OpenGridBoardParams = {
-  gridWidth: 4,
-  gridDepth: 4,
-  variant: 'full',
-  orientation: 'flat',
-}
+	gridWidth: 4,
+	gridDepth: 4,
+	variant: 'full',
+	orientation: 'flat',
+};
 
 export const PRINT_BED_PRESETS: Record<string, PrintBedPreset> = {
-  '220x220': { name: '220 x 220 mm (Ender 3 / Prusa MK3)', width: 220, depth: 220 },
-  '256x256': { name: '256 x 256 mm (Bambu Lab A1/P1)', width: 256, depth: 256 },
-  '350x350': { name: '350 x 350 mm (Voron 350 / Large)', width: 350, depth: 350 },
-}
+	'220x220': {
+		name: '220 x 220 mm (Ender 3 / Prusa MK3)',
+		width: 220,
+		depth: 220,
+	},
+	'256x256': {
+		name: '256 x 256 mm (Bambu Lab A1/P1)',
+		width: 256,
+		depth: 256,
+	},
+	'350x350': {
+		name: '350 x 350 mm (Voron 350 / Large)',
+		width: 350,
+		depth: 350,
+	},
+};

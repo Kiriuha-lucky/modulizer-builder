@@ -1,221 +1,237 @@
-import { useEffect, useMemo, useRef } from 'react'
-import { Plane, Vector3 } from 'three'
-import { Canvas, useThree, useFrame } from '@react-three/fiber'
-import { OrbitControls, GizmoHelper, GizmoViewport } from '@react-three/drei'
-import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js'
-import { GridOverlay } from './GridOverlay'
-import { SceneObject } from './SceneObject'
-import { MeasurementOverlay } from './MeasurementOverlay'
-import { useProjectStore } from '@/store/projectStore'
-import { useUIStore } from '@/store/uiStore'
-import type { ViewportBackground, LightingPreset, CameraPreset } from '@/types/gridfinity'
+import { useEffect, useMemo, useRef } from 'react';
+import { Plane, Vector3 } from 'three';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { OrbitControls, GizmoHelper, GizmoViewport } from '@react-three/drei';
+import type { OrbitControls as OrbitControlsImpl } from 'three/examples/jsm/controls/OrbitControls.js';
+import { GridOverlay } from './GridOverlay';
+import { SceneObject } from './SceneObject';
+import { MeasurementOverlay } from './MeasurementOverlay';
+import { useProjectStore } from '@/store/projectStore';
+import { useUIStore } from '@/store/uiStore';
+import type {
+	ViewportBackground,
+	LightingPreset,
+	CameraPreset,
+} from '@/types/gridfinity';
+import { Box } from '@chakra-ui/react';
 
 const BACKGROUND_COLORS: Record<ViewportBackground, string> = {
-  dark: '#1a1a2e',
-  light: '#d4d4d8',
-  neutral: '#404040',
-}
+	dark: '#1a1a2e',
+	light: '#d4d4d8',
+	neutral: '#404040',
+};
 
 const LIGHTING_PRESETS: Record<
-  LightingPreset,
-  {
-    ambient: number
-    lights: { position: [number, number, number]; intensity: number }[]
-  }
+	LightingPreset,
+	{
+		ambient: number;
+		lights: { position: [number, number, number]; intensity: number }[];
+	}
 > = {
-  studio: {
-    ambient: 0.5,
-    lights: [
-      { position: [200, 300, 200], intensity: 1.0 },
-      { position: [-100, 200, -100], intensity: 0.3 },
-    ],
-  },
-  outdoor: {
-    ambient: 0.7,
-    lights: [
-      { position: [300, 500, 100], intensity: 1.2 },
-      { position: [-200, 100, 200], intensity: 0.2 },
-    ],
-  },
-  soft: {
-    ambient: 0.8,
-    lights: [
-      { position: [100, 200, 100], intensity: 0.6 },
-      { position: [-100, 200, -100], intensity: 0.5 },
-      { position: [0, 300, 0], intensity: 0.3 },
-    ],
-  },
-}
+	studio: {
+		ambient: 0.5,
+		lights: [
+			{ position: [200, 300, 200], intensity: 1.0 },
+			{ position: [-100, 200, -100], intensity: 0.3 },
+		],
+	},
+	outdoor: {
+		ambient: 0.7,
+		lights: [
+			{ position: [300, 500, 100], intensity: 1.2 },
+			{ position: [-200, 100, 200], intensity: 0.2 },
+		],
+	},
+	soft: {
+		ambient: 0.8,
+		lights: [
+			{ position: [100, 200, 100], intensity: 0.6 },
+			{ position: [-100, 200, -100], intensity: 0.5 },
+			{ position: [0, 300, 0], intensity: 0.3 },
+		],
+	},
+};
 
 const CAMERA_POSITIONS: Record<
-  CameraPreset,
-  { position: [number, number, number]; target: [number, number, number] }
+	CameraPreset,
+	{ position: [number, number, number]; target: [number, number, number] }
 > = {
-  top: { position: [0, 400, 0.01], target: [0, 0, 0] },
-  front: { position: [0, 50, 400], target: [0, 50, 0] },
-  side: { position: [400, 50, 0], target: [0, 50, 0] },
-  isometric: { position: [200, 150, 200], target: [0, 0, 0] },
-}
+	top: { position: [0, 400, 0.01], target: [0, 0, 0] },
+	front: { position: [0, 50, 400], target: [0, 50, 0] },
+	side: { position: [400, 50, 0], target: [0, 50, 0] },
+	isometric: { position: [200, 150, 200], target: [0, 0, 0] },
+};
 
 function CameraController() {
-  const cameraPreset = useUIStore((s) => s.cameraPreset)
-  const setCameraPreset = useUIStore((s) => s.setCameraPreset)
-  const { camera } = useThree()
-  const controls = useThree((s) => s.controls) as OrbitControlsImpl | null
+	const cameraPreset = useUIStore((s) => s.cameraPreset);
+	const setCameraPreset = useUIStore((s) => s.setCameraPreset);
+	const { camera } = useThree();
+	const controls = useThree((s) => s.controls) as OrbitControlsImpl | null;
 
-  useEffect(() => {
-    if (!cameraPreset || !controls) return
-    const preset = CAMERA_POSITIONS[cameraPreset]
-    camera.position.set(...preset.position)
-    controls.target.set(...preset.target)
-    controls.update()
-    setCameraPreset(null)
-  }, [cameraPreset, camera, controls, setCameraPreset])
+	useEffect(() => {
+		if (!cameraPreset || !controls) return;
+		const preset = CAMERA_POSITIONS[cameraPreset];
+		camera.position.set(...preset.position);
+		controls.target.set(...preset.target);
+		controls.update();
+		setCameraPreset(null);
+	}, [cameraPreset, camera, controls, setCameraPreset]);
 
-  return null
+	return null;
 }
 
 function SectionPlane() {
-  const sectionView = useUIStore((s) => s.sectionView)
-  const sectionPlaneY = useUIStore((s) => s.sectionPlaneY)
-  const prevSectionViewRef = useRef(sectionView)
-  const clippingPlanesRef = useRef<Plane[]>([])
+	const sectionView = useUIStore((s) => s.sectionView);
+	const sectionPlaneY = useUIStore((s) => s.sectionPlaneY);
+	const prevSectionViewRef = useRef(sectionView);
+	const clippingPlanesRef = useRef<Plane[]>([]);
 
-  const clippingPlane = useMemo(
-    () => new Plane(new Vector3(0, -1, 0), sectionPlaneY),
-    [sectionPlaneY],
-  )
+	const clippingPlane = useMemo(
+		() => new Plane(new Vector3(0, -1, 0), sectionPlaneY),
+		[sectionPlaneY]
+	);
 
-  useFrame(({ gl }) => {
-    if (sectionView) {
-      // Only reallocate the array when section view is first enabled
-      if (!prevSectionViewRef.current || clippingPlanesRef.current[0] !== clippingPlane) {
-        clippingPlanesRef.current = [clippingPlane]
-      }
-      gl.clippingPlanes = clippingPlanesRef.current
-      gl.localClippingEnabled = true
-    } else if (gl.localClippingEnabled) {
-      gl.clippingPlanes = []
-      gl.localClippingEnabled = false
-    }
-    prevSectionViewRef.current = sectionView
-  })
+	useFrame(({ gl }) => {
+		if (sectionView) {
+			// Only reallocate the array when section view is first enabled
+			if (
+				!prevSectionViewRef.current ||
+				clippingPlanesRef.current[0] !== clippingPlane
+			) {
+				clippingPlanesRef.current = [clippingPlane];
+			}
+			gl.clippingPlanes = clippingPlanesRef.current;
+			gl.localClippingEnabled = true;
+		} else if (gl.localClippingEnabled) {
+			gl.clippingPlanes = [];
+			gl.localClippingEnabled = false;
+		}
+		prevSectionViewRef.current = sectionView;
+	});
 
-  return null
+	return null;
 }
 
 function Scene() {
-  const objects = useProjectStore((s) => s.objects)
-  const clearSelection = useUIStore((s) => s.clearSelection)
-  const selectedObjectIds = useUIStore((s) => s.selectedObjectIds)
-  const lightingPreset = useUIStore((s) => s.lightingPreset)
-  const showMeasurements = useUIStore((s) => s.showMeasurements)
+	const objects = useProjectStore((s) => s.objects);
+	const clearSelection = useUIStore((s) => s.clearSelection);
+	const selectedObjectIds = useUIStore((s) => s.selectedObjectIds);
+	const lightingPreset = useUIStore((s) => s.lightingPreset);
+	const showMeasurements = useUIStore((s) => s.showMeasurements);
 
-  const lighting = LIGHTING_PRESETS[lightingPreset]
+	const lighting = LIGHTING_PRESETS[lightingPreset];
 
-  // Only show measurement overlay for single selection
-  const singleSelectedObject = useMemo(
-    () =>
-      selectedObjectIds.length === 1
-        ? (objects.find((o) => o.id === selectedObjectIds[0]) ?? null)
-        : null,
-    [selectedObjectIds, objects],
-  )
+	// Only show measurement overlay for single selection
+	const singleSelectedObject = useMemo(
+		() =>
+			selectedObjectIds.length === 1
+				? (objects.find((o) => o.id === selectedObjectIds[0]) ?? null)
+				: null,
+		[selectedObjectIds, objects]
+	);
 
-  useEffect(() => {
-    // Если есть объекты и ни один не выделен — выделяем первый
-    if (objects.length > 0 && selectedObjectIds.length === 0) {
-      const setSelected = useUIStore.getState().setSelectedObjectIds
-      setSelected([objects[0].id])
-    }
-  }, [objects, selectedObjectIds])
+	useEffect(() => {
+		// Если есть объекты и ни один не выделен — выделяем первый
+		if (objects.length > 0 && selectedObjectIds.length === 0) {
+			const setSelected = useUIStore.getState().setSelectedObjectIds;
+			setSelected([objects[0].id]);
+		}
+	}, [objects, selectedObjectIds]);
 
-  return (
-    <>
-      {/* Lighting */}
-      <ambientLight intensity={lighting.ambient} />
-      {lighting.lights.map((light, i) => (
-        <directionalLight
-          key={`${lightingPreset}-${i}`}
-          position={light.position}
-          intensity={light.intensity}
-          castShadow={i === 0}
-          shadow-mapSize={i === 0 ? [1024, 1024] : undefined}
-        />
-      ))}
+	return (
+		<>
+			{/* Lighting */}
+			<ambientLight intensity={lighting.ambient} />
+			{lighting.lights.map((light, i) => (
+				<directionalLight
+					key={`${lightingPreset}-${i}`}
+					position={light.position}
+					intensity={light.intensity}
+					castShadow={i === 0}
+					shadow-mapSize={i === 0 ? [1024, 1024] : undefined}
+				/>
+			))}
 
-      {/* Camera controls */}
-      <OrbitControls
-        makeDefault
-        minDistance={20}
-        maxDistance={2000}
-        enableDamping
-        dampingFactor={0.1}
-        enableRotate={false}
-        enablePan={true}
-        enableZoom={true}
-      />
+			{/* Camera controls */}
+			<OrbitControls
+				makeDefault
+				minDistance={20}
+				maxDistance={2000}
+				enableDamping
+				dampingFactor={0.1}
+				// enableRotate={false}
+				// enablePan={true}
+				// enableZoom={true}
+			/>
 
-      {/* Camera preset controller */}
-      <CameraController />
+			{/* Camera preset controller */}
+			<CameraController />
 
-      {/* Section plane */}
-      <SectionPlane />
+			{/* Section plane */}
+			<SectionPlane />
 
-      {/* Grid */}
-      <GridOverlay />
+			{/* Grid */}
+			<GridOverlay />
 
-      {/* Scene objects */}
-      <group
-        // onClick={(e) => {
-        //   // Clicks on objects or the grid are handled by their own handlers;
-        //   // only clear selection for background/empty-space clicks
-        //   if (e.object.type === 'GridHelper' || e.object.type === 'Mesh') return
-        //   clearSelection()
-        // }}
-      >
-        {objects.map((obj) => (
-          <SceneObject key={obj.id} object={obj} />
-        ))}
-      </group>
+			{/* Scene objects */}
+			<group
+			// onClick={(e) => {
+			//   // Clicks on objects or the grid are handled by their own handlers;
+			//   // only clear selection for background/empty-space clicks
+			//   if (e.object.type === 'GridHelper' || e.object.type === 'Mesh') return
+			//   clearSelection()
+			// }}
+			>
+				{objects.map((obj) => (
+					<SceneObject key={obj.id} object={obj} />
+				))}
+			</group>
 
-      {/* Measurement overlay */}
-      {/*{showMeasurements && singleSelectedObject && (*/}
-      {/*  <MeasurementOverlay object={singleSelectedObject} />*/}
-      {/*)}*/}
+			{/* Measurement overlay */}
+			{/*{showMeasurements && singleSelectedObject && (*/}
+			{/*  <MeasurementOverlay object={singleSelectedObject} />*/}
+			{/*)}*/}
 
-      {/* Gizmo helper - axis indicator in corner */}
-      {/*<GizmoHelper alignment="bottom-right" margin={[60, 60]}>*/}
-      {/*  <GizmoViewport axisColors={['#e74c3c', '#2ecc71', '#3498db']} labelColor="white" />*/}
-      {/*</GizmoHelper>*/}
-    </>
-  )
+			{/* Gizmo helper - axis indicator in corner */}
+			{/*<GizmoHelper alignment="bottom-right" margin={[60, 60]}>*/}
+			{/*  <GizmoViewport axisColors={['#e74c3c', '#2ecc71', '#3498db']} labelColor="white" />*/}
+			{/*</GizmoHelper>*/}
+		</>
+	);
 }
 
 export function Viewport() {
-  const clearSelection = useUIStore((s) => s.clearSelection)
-  const viewportBackground = useUIStore((s) => s.viewportBackground)
-  const bgColor = BACKGROUND_COLORS[viewportBackground]
+	// const clearSelection = useUIStore((s) => s.clearSelection);
+	const viewportBackground = useUIStore((s) => s.viewportBackground);
+	const bgColor = BACKGROUND_COLORS[viewportBackground];
 
-  return (
-    <div className="h-full w-full touch-manipulation">
-      <Canvas
-        camera={{
-          position: [200, 150, 200],
-          fov: 50,
-          near: 0.1,
-          far: 10000,
-        }}
-        shadows
-        gl={{ antialias: true }}
-        // onPointerMissed={() => {
-        //   clearSelection()
-        // }}
-      >
-        <color attach="background" args={[bgColor]} />
-        <fog attach="fog" args={[bgColor, 1000, 3000]} />
-        <Scene />
-      </Canvas>
-    </div>
-  )
+	return (
+		<Box
+			width="full"
+			h="100%"
+			minH={0}
+			borderRadius={'8px'}
+			css={{
+				touchAction: 'manipulation',
+			}}
+		>
+			<Canvas
+				camera={{
+					position: [200, 150, 200],
+					fov: 50,
+					near: 0.1,
+					far: 10000,
+				}}
+				shadows
+				gl={{ antialias: true }}
+				// onPointerMissed={() => {
+				// 	clearSelection();
+				// }}
+			>
+				<color attach="background" args={[bgColor]} />
+				<fog attach="fog" args={[bgColor, 1000, 3000]} />
+				<Scene />
+			</Canvas>
+		</Box>
+	);
 }

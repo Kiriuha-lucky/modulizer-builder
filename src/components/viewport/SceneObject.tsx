@@ -1,189 +1,214 @@
-import { useEffect, useMemo, useRef } from 'react'
-import { BufferGeometry } from 'three'
-import type { Group } from 'three'
-import { Edges } from '@react-three/drei'
+import { useEffect, useMemo, useRef } from 'react';
+import { BufferGeometry, DoubleSide } from 'three';
+import type { Group } from 'three';
+import { Edges } from '@react-three/drei';
 import type {
-  GridfinityObject,
-  GridfinityProfile,
-  Modifier,
-  ModifierContext,
-} from '@/types/gridfinity'
-import { generateModifierGeometry } from '@/engine/export/mergeObjectGeometry'
-import { objectKindRegistry } from '@/engine/registry/objectKindRegistry'
-import { modifierKindRegistry } from '@/engine/registry/modifierKindRegistry'
-import { useProjectStore } from '@/store/projectStore'
-import { useProfileStore } from '@/store/profileStore'
-import { useUIStore } from '@/store/uiStore'
-import { useObjectDrag } from './useObjectDrag'
+	GridfinityObject,
+	GridfinityProfile,
+	Modifier,
+	ModifierContext,
+} from '@/types/gridfinity';
+import { generateModifierGeometry } from '@/engine/export/mergeObjectGeometry';
+import { objectKindRegistry } from '@/engine/registry/objectKindRegistry';
+import { modifierKindRegistry } from '@/engine/registry/modifierKindRegistry';
+import { useProjectStore } from '@/store/projectStore';
+import { useProfileStore } from '@/store/profileStore';
+import { useUIStore } from '@/store/uiStore';
+import { useObjectDrag } from './useObjectDrag';
 
 interface SceneObjectProps {
-  object: GridfinityObject
+	object: GridfinityObject;
 }
 
 interface ModifierMeshesProps {
-  parentId: string
-  context: ModifierContext
+	parentId: string;
+	context: ModifierContext;
 }
 
 function ModifierMeshes({ parentId, context }: ModifierMeshesProps) {
-  const allModifiers = useProjectStore((s) => s.modifiers)
-  const modifiers = useMemo(
-    () => allModifiers.filter((m) => m.parentId === parentId),
-    [allModifiers, parentId],
-  )
-  const activeProfile = useProfileStore((s) => s.activeProfile)
+	const allModifiers = useProjectStore((s) => s.modifiers);
+	const modifiers = useMemo(
+		() => allModifiers.filter((m) => m.parentId === parentId),
+		[allModifiers, parentId]
+	);
+	const activeProfile = useProfileStore((s) => s.activeProfile);
 
-  return (
-    <>
-      {modifiers.map((modifier) => (
-        <ModifierMesh
-          key={modifier.id}
-          modifier={modifier}
-          context={context}
-          profile={activeProfile}
-        />
-      ))}
-    </>
-  )
+	return (
+		<>
+			{modifiers.map((modifier) => (
+				<ModifierMesh
+					key={modifier.id}
+					modifier={modifier}
+					context={context}
+					profile={activeProfile}
+				/>
+			))}
+		</>
+	);
 }
 
 interface ModifierMeshProps {
-  modifier: Modifier
-  context: ModifierContext
-  profile: GridfinityProfile
+	modifier: Modifier;
+	context: ModifierContext;
+	profile: GridfinityProfile;
 }
 
 function ModifierMesh({ modifier, context, profile }: ModifierMeshProps) {
-  const curveQuality = useUIStore((s) => s.curveQuality)
-  const showWireframe = useUIStore((s) => s.showWireframe)
-  const transparencyMode = useUIStore((s) => s.transparencyMode)
+	const curveQuality = useUIStore((s) => s.curveQuality);
+	const showWireframe = useUIStore((s) => s.showWireframe);
+	const transparencyMode = useUIStore((s) => s.transparencyMode);
 
-  const geometry = useMemo(() => {
-    return generateModifierGeometry(modifier, context, profile)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modifier, context, profile, curveQuality])
+	const geometry = useMemo(() => {
+		return generateModifierGeometry(modifier, context, profile);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [modifier, context, profile, curveQuality]);
 
-  useEffect(() => {
-    return () => {
-      geometry?.dispose()
-    }
-  }, [geometry])
+	useEffect(() => {
+		return () => {
+			geometry?.dispose();
+		};
+	}, [geometry]);
 
-  const childContexts = useMemo((): ModifierContext[] => {
-    const reg = modifierKindRegistry.get(modifier.kind)
-    if (reg?.subdividesSpace && reg.computeChildContext) {
-      const result = reg.computeChildContext(modifier.params as Record<string, unknown>, context)
-      return Array.isArray(result) ? result : [result]
-    }
-    return [context]
-  }, [modifier, context])
+	const childContexts = useMemo((): ModifierContext[] => {
+		const reg = modifierKindRegistry.get(modifier.kind);
+		if (reg?.subdividesSpace && reg.computeChildContext) {
+			const result = reg.computeChildContext(
+				modifier.params as Record<string, unknown>,
+				context
+			);
+			return Array.isArray(result) ? result : [result];
+		}
+		return [context];
+	}, [modifier, context]);
 
-  const hasGeometry = geometry?.attributes.position && geometry.attributes.position.count > 0
+	const hasGeometry =
+		geometry?.attributes.position && geometry.attributes.position.count > 0;
 
-  const reg = modifierKindRegistry.get(modifier.kind)
-  const color = reg?.color ?? '#cccccc'
-  const opacity = transparencyMode ? 0.4 : 0.9
+	const reg = modifierKindRegistry.get(modifier.kind);
+	const color = reg?.color ?? '#cccccc';
+	const opacity = transparencyMode ? 0.4 : 0.9;
 
-  return (
-    <>
-      {hasGeometry && (
-        <mesh geometry={geometry}>
-          <meshStandardMaterial
-            color={color}
-            roughness={0.6}
-            metalness={0.1}
-            transparent
-            opacity={opacity}
-            wireframe={showWireframe}
-          />
-        </mesh>
-      )}
+	return (
+		<>
+			{hasGeometry && (
+				<mesh geometry={geometry}>
+					<meshStandardMaterial
+						color={color}
+						roughness={0.6}
+						metalness={0.1}
+						transparent
+						opacity={opacity}
+						wireframe={showWireframe}
+						side={DoubleSide}
+					/>
+				</mesh>
+			)}
 
-      {childContexts.map((ctx, i) => (
-        <ModifierMeshes key={`${modifier.id}-ctx-${i}`} parentId={modifier.id} context={ctx} />
-      ))}
-    </>
-  )
+			{childContexts.map((ctx, i) => (
+				<ModifierMeshes
+					key={`${modifier.id}-ctx-${i}`}
+					parentId={modifier.id}
+					context={ctx}
+				/>
+			))}
+		</>
+	);
 }
 
 export function SceneObject({ object }: SceneObjectProps) {
-  const groupRef = useRef<Group | null>(null)
+	const groupRef = useRef<Group | null>(null);
 
-  const activeProfile = useProfileStore((s) => s.activeProfile)
-  const selectedObjectIds = useUIStore((s) => s.selectedObjectIds)
-  const selectObject = useUIStore((s) => s.selectObject)
-  const showWireframe = useUIStore((s) => s.showWireframe)
-  const transparencyMode = useUIStore((s) => s.transparencyMode)
-  const curveQuality = useUIStore((s) => s.curveQuality)
+	const activeProfile = useProfileStore((s) => s.activeProfile);
+	const selectedObjectIds = useUIStore((s) => s.selectedObjectIds);
+	const selectObject = useUIStore((s) => s.selectObject);
+	const showWireframe = useUIStore((s) => s.showWireframe);
+	const transparencyMode = useUIStore((s) => s.transparencyMode);
+	const curveQuality = useUIStore((s) => s.curveQuality);
 
-  const isSelected = selectedObjectIds.includes(object.id)
+	const isSelected = selectedObjectIds.includes(object.id);
 
-  const geometry = useMemo(() => {
-    const reg = objectKindRegistry.get(object.kind)
-    if (!reg) return new BufferGeometry()
+	const geometry = useMemo(() => {
+		const reg = objectKindRegistry.get(object.kind);
+		if (!reg) return new BufferGeometry();
 
-    return reg.generateGeometry(object.params as Record<string, unknown>, activeProfile)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [object.kind, object.params, activeProfile, curveQuality])
+		return reg.generateGeometry(
+			object.params as Record<string, unknown>,
+			activeProfile
+		);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [object.kind, object.params, activeProfile, curveQuality]);
 
-  useEffect(() => {
-    return () => {
-      geometry.dispose()
-    }
-  }, [geometry])
+	useEffect(() => {
+		return () => {
+			geometry.dispose();
+		};
+	}, [geometry]);
 
-  const modifierContext = useMemo(() => {
-    const reg = objectKindRegistry.get(object.kind)
-    if (reg?.supportsModifiers && reg.computeModifierContext) {
-      return reg.computeModifierContext(object.params as Record<string, unknown>, activeProfile)
-    }
-    return null
-  }, [object.kind, object.params, activeProfile])
+	const modifierContext = useMemo(() => {
+		const reg = objectKindRegistry.get(object.kind);
+		if (reg?.supportsModifiers && reg.computeModifierContext) {
+			return reg.computeModifierContext(
+				object.params as Record<string, unknown>,
+				activeProfile
+			);
+		}
+		return null;
+	}, [object.kind, object.params, activeProfile]);
 
-  const objParams = object.params as Record<string, unknown>
-  const gridWidth = objParams.gridWidth as number | undefined
-  const gridDepth = objParams.gridDepth as number | undefined
+	const objParams = object.params as Record<string, unknown>;
+	const gridWidth = objParams.gridWidth as number | undefined;
+	const gridDepth = objParams.gridDepth as number | undefined;
 
-  const { bindDrag, dragging } = useObjectDrag({
-    objectId: object.id,
-    objectRef: groupRef,
-    isSelected,
-    basePosition: object.position,
-    gridWidth,
-    gridDepth,
-  })
+	const { bindDrag, dragging } = useObjectDrag({
+		objectId: object.id,
+		objectRef: groupRef,
+		isSelected,
+		basePosition: object.position,
+		gridWidth,
+		gridDepth,
+	});
 
-  const objectOpacity = transparencyMode ? 0.5 : 1.0
+	const objectOpacity = transparencyMode ? 0.5 : 1.0;
 
-  return (
-    <group
-      ref={groupRef}
-      position={object.position}
-      rotation={object.rotation ?? [0, 0, 0]}
-      {...bindDrag}
-    >
-      <mesh
-        geometry={geometry}
-        onClick={(e) => {
-          e.stopPropagation()
+	return (
+		<group
+			ref={groupRef}
+			position={object.position}
+			rotation={object.rotation ?? [0, 0, 0]}
+			{...bindDrag}
+		>
+			<mesh
+				geometry={geometry}
+				onClick={(e) => {
+					e.stopPropagation();
 
-          if (dragging) return
+					if (dragging) return;
 
-          selectObject(object.id, e.shiftKey || e.ctrlKey || e.metaKey)
-        }}
-      >
-        <meshStandardMaterial
-          color={isSelected ? '#6b9bd2' : '#b0b0b0'}
-          roughness={0.6}
-          metalness={0.1}
-          transparent={transparencyMode}
-          opacity={objectOpacity}
-          wireframe={showWireframe}
-        />
-        {isSelected && !showWireframe && <Edges threshold={15} color="#4a90d9" lineWidth={2} />}
-      </mesh>
+					selectObject(
+						object.id,
+						e.shiftKey || e.ctrlKey || e.metaKey
+					);
+				}}
+			>
+				<meshStandardMaterial
+					color={isSelected ? '#6b9bd2' : '#b0b0b0'}
+					roughness={0.6}
+					metalness={0.1}
+					transparent={transparencyMode}
+					opacity={objectOpacity}
+					wireframe={showWireframe}
+				/>
+				{isSelected && !showWireframe && (
+					<Edges threshold={15} color="#4a90d9" lineWidth={2} />
+				)}
+			</mesh>
 
-      {modifierContext && <ModifierMeshes parentId={object.id} context={modifierContext} />}
-    </group>
-  )
+			{modifierContext && (
+				<ModifierMeshes
+					parentId={object.id}
+					context={modifierContext}
+				/>
+			)}
+		</group>
+	);
 }
