@@ -1,14 +1,22 @@
 import { Label } from '@/components/ui/label';
 
 import {
-	Select,
+	Select as Select1,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
 import type { ParamField } from '@/engine/registry/types';
-import { Flex, HStack, Slider, Switch } from '@chakra-ui/react';
+import {
+	Flex,
+	HStack,
+	Slider,
+	Switch,
+	Select,
+	Portal,
+	createListCollection,
+} from '@chakra-ui/react';
 
 export interface SchemaFieldProps {
 	field: ParamField;
@@ -136,33 +144,71 @@ export function SchemaField({ field, value, onChange }: SchemaFieldProps) {
 		}
 		case 'select': {
 			const strValue = typeof value === 'string' ? value : '';
+			console.log(field.options);
+			const entities = createListCollection({
+				items: field.options,
+			});
 			return (
-				<div className="space-y-1.5">
-					<Label htmlFor={fieldId} className="text-xs">
-						{field.label}
-					</Label>
-					<Select
-						value={strValue}
-						onValueChange={(v) => {
-							onChange(v);
-						}}
-					>
-						<SelectTrigger id={fieldId} className="h-8 text-xs">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							{field.options.map((opt) => (
-								<SelectItem
-									key={opt.value}
-									value={opt.value}
-									className="text-xs"
-								>
-									{opt.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-				</div>
+				<Select.Root
+					collection={entities}
+					value={[strValue]}
+					onValueChange={(e) => {
+						console.log(e.value);
+						console.log(strValue);
+						onChange(e?.value?.[0]);
+					}}
+				>
+					<Select.HiddenSelect />
+					<Select.Label>{field.label}</Select.Label>
+					<Select.Control>
+						<Select.Trigger />
+
+						<Select.IndicatorGroup>
+							<Select.Indicator />
+						</Select.IndicatorGroup>
+					</Select.Control>
+					<Portal>
+						<Select.Positioner>
+							<Select.Content>
+								{entities.items.map((framework) => (
+									<Select.Item
+										item={framework}
+										key={framework.value}
+									>
+										{framework.label}
+										<Select.ItemIndicator />
+									</Select.Item>
+								))}
+							</Select.Content>
+						</Select.Positioner>
+					</Portal>
+				</Select.Root>
+				// <div className="space-y-1.5">
+				// 	<Label htmlFor={fieldId} className="text-xs">
+				// 		{field.label}
+				// 	</Label>
+				// 	<Select1
+				// 		value={strValue}
+				// 		onValueChange={(v) => {
+				// 			onChange(v);
+				// 		}}
+				// 	>
+				// 		<SelectTrigger id={fieldId} className="h-8 text-xs">
+				// 			<SelectValue />
+				// 		</SelectTrigger>
+				// 		<SelectContent>
+				// 			{field.options.map((opt) => (
+				// 				<SelectItem
+				// 					key={opt.value}
+				// 					value={opt.value}
+				// 					className="text-xs"
+				// 				>
+				// 					{opt.label}
+				// 				</SelectItem>
+				// 			))}
+				// 		</SelectContent>
+				// 	</Select1>
+				// </div>
 			);
 		}
 		case 'number': {
