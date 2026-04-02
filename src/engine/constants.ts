@@ -80,7 +80,7 @@ export const DEFAULT_DIVIDER_GRID_PARAMS: DividerGridModifierParams = {
 export const DEFAULT_LABEL_TAB_PARAMS: LabelTabModifierParams = {
 	wall: 'front',
 	angle: 45,
-	height: 7,
+	height: 135,
 };
 
 export const DEFAULT_SCOOP_PARAMS: ScoopModifierParams = {

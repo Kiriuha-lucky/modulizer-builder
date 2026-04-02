@@ -52,7 +52,7 @@ export function Layout() {
 
 	return (
 		<Grid
-			gridTemplateRows={'72px 45px 1fr'}
+			gridTemplateRows={'72px 1fr'}
 			w={'full'}
 			h={'full'}
 			flexDir={'column'}
@@ -61,7 +61,7 @@ export function Layout() {
 		>
 			<Header />
 			{/* Toolbar */}
-			<Toolbar />
+			{/*<Toolbar />*/}
 
 			{/* Main content area */}
 			<Show when={isEditView}>

@@ -1,12 +1,4 @@
 import { Label } from '@/components/ui/label';
-
-import {
-	Select as Select1,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
 import type { ParamField } from '@/engine/registry/types';
 import {
 	Flex,
