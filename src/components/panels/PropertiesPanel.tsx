@@ -1,20 +1,8 @@
-import { ScrollArea as ScrollArea1 } from '@/components/ui/scroll-area';
 import { useProjectStore } from '@/store/projectStore';
 import { useUIStore } from '@/store/uiStore';
 import { objectKindRegistry } from '@/engine/registry/objectKindRegistry';
 import type { ObjectPropertiesComponentProps } from '@/engine/registry/types';
-import { SchemaPropertiesPanel } from './SchemaPropertiesPanel';
-import {
-	Box,
-	Flex,
-	Heading,
-	Icon,
-	IconButton,
-	ScrollArea,
-	Show,
-	Text,
-} from '@chakra-ui/react';
-import { GripVertical, HelpCircle, Trash2 } from 'lucide-react';
+import { Flex, Heading, ScrollArea, Show, Text } from '@chakra-ui/react';
 
 export function PropertiesPanel() {
 	const objects = useProjectStore((s) => s.objects);
@@ -118,7 +106,7 @@ export function PropertiesPanel() {
 					</ScrollArea.Content>
 				</ScrollArea.Viewport>
 
-				<ScrollArea.Scrollbar w="10px" p="1px" bg="transparent">
+				<ScrollArea.Scrollbar p="1px" bg="transparent">
 					<ScrollArea.Thumb
 						borderRadius="full"
 						bg="rgba(15,23,42,0.14)"

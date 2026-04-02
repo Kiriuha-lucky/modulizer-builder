@@ -23,9 +23,9 @@ export function BinProperties({ object }: BinPropertiesProps) {
 	const dims = getBinDimensions(object.params, activeProfile);
 
 	return (
-		<Flex direction="column" gap={3}>
+		<Flex direction="column" gap={1}>
 			<Box
-				p="14px"
+				p="7px"
 				borderRadius="18px"
 				bg="rgba(255,255,255,0.46)"
 				border="1px solid"
@@ -57,7 +57,7 @@ export function BinProperties({ object }: BinPropertiesProps) {
 
 			{/* Grid Width */}
 			<Box
-				p="12px"
+				p="7px"
 				borderRadius="16px"
 				bg="rgba(255,255,255,0.40)"
 				border="1px solid"
@@ -128,7 +128,7 @@ export function BinProperties({ object }: BinPropertiesProps) {
 
 			{/* Grid Depth */}
 			<Box
-				p="12px"
+				p="7px"
 				borderRadius="16px"
 				bg="rgba(255,255,255,0.40)"
 				border="1px solid"
@@ -199,7 +199,7 @@ export function BinProperties({ object }: BinPropertiesProps) {
 
 			{/* Height Units */}
 			<Box
-				p="12px"
+				p="7px"
 				borderRadius="16px"
 				bg="rgba(255,255,255,0.40)"
 				border="1px solid"
@@ -270,7 +270,7 @@ export function BinProperties({ object }: BinPropertiesProps) {
 
 			{/* Stacking Lip */}
 			<Box
-				p="12px"
+				p="7px"
 				borderRadius="16px"
 				bg="rgba(255,255,255,0.40)"
 				border="1px solid"
@@ -309,7 +309,7 @@ export function BinProperties({ object }: BinPropertiesProps) {
 
 			{/* Wall Thickness */}
 			<Box
-				p="12px"
+				p="7px"
 				borderRadius="16px"
 				bg="rgba(255,255,255,0.40)"
 				border="1px solid"
@@ -381,7 +381,7 @@ export function BinProperties({ object }: BinPropertiesProps) {
 
 			{/* Inner Fillet */}
 			<Box
-				p="12px"
+				p="7px"
 				borderRadius="16px"
 				bg="rgba(255,255,255,0.40)"
 				border="1px solid"
@@ -468,7 +468,7 @@ export function BinProperties({ object }: BinPropertiesProps) {
 
 			{/* Magnet Holes */}
 			<Box
-				p="12px"
+				p="7px"
 				borderRadius="16px"
 				bg="rgba(255,255,255,0.40)"
 				border="1px solid"
@@ -507,7 +507,7 @@ export function BinProperties({ object }: BinPropertiesProps) {
 
 			{/* Weight Holes */}
 			<Box
-				p="12px"
+				p="7px"
 				borderRadius="16px"
 				bg="rgba(255,255,255,0.40)"
 				border="1px solid"

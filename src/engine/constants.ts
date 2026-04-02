@@ -85,7 +85,7 @@ export const DEFAULT_LABEL_TAB_PARAMS: LabelTabModifierParams = {
 
 export const DEFAULT_SCOOP_PARAMS: ScoopModifierParams = {
 	wall: 'front',
-	radius: 1,
+	radius: 7,
 };
 
 export const DEFAULT_INSERT_PARAMS: InsertModifierParams = {

@@ -72,7 +72,7 @@ export function registerBuiltinKinds(): void {
 
 	objectKindRegistry.register({
 		kind: 'baseplate',
-		label: 'Baseplate',
+		label: 'Сетка',
 		icon: Grid3x3,
 		defaultParams: { ...DEFAULT_BASEPLATE_PARAMS },
 		generateGeometry: generateBaseplate,
@@ -84,7 +84,7 @@ export function registerBuiltinKinds(): void {
 
 	objectKindRegistry.register({
 		kind: 'bin',
-		label: 'Bin',
+		label: 'Модуль',
 		icon: Box,
 		defaultParams: { ...DEFAULT_BIN_PARAMS },
 		generateGeometry: generateBin,
@@ -102,7 +102,7 @@ export function registerBuiltinKinds(): void {
 
 	objectKindRegistry.register({
 		kind: 'opengridBoard',
-		label: 'OpenGrid Board',
+		label: 'Сетка OpenGrid',
 		icon: Grip,
 		defaultParams: { ...DEFAULT_OPENGRID_BOARD_PARAMS },
 		generateGeometry: generateOpenGridBoard,
@@ -116,7 +116,7 @@ export function registerBuiltinKinds(): void {
 
 	modifierKindRegistry.register({
 		kind: 'dividerGrid',
-		label: 'Divider Grid',
+		label: 'Перегородки',
 		color: '#a8d8ea',
 		defaultParams: { ...DEFAULT_DIVIDER_GRID_PARAMS },
 		generateGeometry: generateDividerGrid,
@@ -163,7 +163,7 @@ export function registerBuiltinKinds(): void {
 
 	modifierKindRegistry.register({
 		kind: 'labelTab',
-		label: 'Label Tab',
+		label: 'Площадка для подписи',
 		color: '#f9c784',
 		defaultParams: { ...DEFAULT_LABEL_TAB_PARAMS },
 		generateGeometry: generateLabelTab,
@@ -173,7 +173,7 @@ export function registerBuiltinKinds(): void {
 
 	modifierKindRegistry.register({
 		kind: 'scoop',
-		label: 'Scoop',
+		label: 'Выемка для захвата',
 		color: '#b5e8b5',
 		defaultParams: { ...DEFAULT_SCOOP_PARAMS },
 		generateGeometry: generateScoop,
@@ -183,24 +183,24 @@ export function registerBuiltinKinds(): void {
 			fields: [
 				{
 					key: 'wall',
-					label: 'Wall',
+					label: 'Стенка',
 					type: 'select',
 					options: [
-						{ value: 'front', label: 'Front' },
-						{ value: 'back', label: 'Back' },
-						{ value: 'left', label: 'Left' },
-						{ value: 'right', label: 'Right' },
+						{ value: 'front', label: 'Передняя' },
+						{ value: 'back', label: 'Задняя' },
+						{ value: 'left', label: 'Левая' },
+						{ value: 'right', label: 'Правая' },
 					],
 				},
-				{
-					key: 'radius',
-					label: 'Radius',
-					type: 'slider',
-					min: 1,
-					max: 20,
-					step: 1,
-					unit: 'mm',
-				},
+				// {
+				// 	key: 'radius',
+				// 	label: 'Радиус скругления',
+				// 	type: 'slider',
+				// 	min: 1,
+				// 	max: 20,
+				// 	step: 1,
+				// 	unit: 'mm',
+				// },
 			],
 		},
 	});
@@ -282,18 +282,18 @@ export function registerBuiltinKinds(): void {
 			fields: [
 				{
 					key: 'wall',
-					label: 'Wall',
+					label: 'Стенка',
 					type: 'select',
 					options: [
-						{ value: 'front', label: 'Front' },
-						{ value: 'back', label: 'Back' },
-						{ value: 'left', label: 'Left' },
-						{ value: 'right', label: 'Right' },
+						{ value: 'front', label: 'Передняя' },
+						{ value: 'back', label: 'Задняя' },
+						{ value: 'left', label: 'Левая' },
+						{ value: 'right', label: 'Правая' },
 					],
 				},
 				{
 					key: 'width',
-					label: 'Width',
+					label: 'Ширина',
 					type: 'slider',
 					min: 10,
 					max: 30,
@@ -302,7 +302,7 @@ export function registerBuiltinKinds(): void {
 				},
 				{
 					key: 'depth',
-					label: 'Depth',
+					label: 'Длина',
 					type: 'slider',
 					min: 5,
 					max: 20,

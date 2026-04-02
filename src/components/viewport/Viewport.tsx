@@ -14,6 +14,7 @@ import type {
 	CameraPreset,
 } from '@/types/gridfinity';
 import { Box } from '@chakra-ui/react';
+import { ViewModeSwitcher } from '@/components/viewport/ViewModeSwitcher.tsx';
 
 const BACKGROUND_COLORS: Record<ViewportBackground, string> = {
 	dark: '#1a1a2e',
@@ -57,6 +58,7 @@ const CAMERA_POSITIONS: Record<
 	{ position: [number, number, number]; target: [number, number, number] }
 > = {
 	top: { position: [0, 400, 0.01], target: [0, 0, 0] },
+	bottom: { position: [0, -400, 0.01], target: [0, 0, 0] },
 	front: { position: [0, 50, 400], target: [0, 50, 0] },
 	side: { position: [400, 50, 0], target: [0, 50, 0] },
 	isometric: { position: [200, 150, 200], target: [0, 0, 0] },
@@ -215,6 +217,7 @@ export function Viewport() {
 				touchAction: 'manipulation',
 			}}
 		>
+			<ViewModeSwitcher />
 			<Canvas
 				camera={{
 					position: [200, 150, 200],

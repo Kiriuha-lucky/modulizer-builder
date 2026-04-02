@@ -143,26 +143,24 @@ export function SchemaField({ field, value, onChange }: SchemaFieldProps) {
 			);
 		}
 		case 'select': {
-			const strValue = typeof value === 'string' ? value : '';
-			console.log(field.options);
+			const strValue = typeof value === 'string' ? [value] : [''];
 			const entities = createListCollection({
 				items: field.options,
 			});
 			return (
 				<Select.Root
 					collection={entities}
-					value={[strValue]}
+					value={strValue}
 					onValueChange={(e) => {
-						console.log(e.value);
-						console.log(strValue);
 						onChange(e?.value?.[0]);
 					}}
 				>
 					<Select.HiddenSelect />
 					<Select.Label>{field.label}</Select.Label>
 					<Select.Control>
-						<Select.Trigger />
-
+						<Select.Trigger>
+							<Select.ValueText />
+						</Select.Trigger>
 						<Select.IndicatorGroup>
 							<Select.Indicator />
 						</Select.IndicatorGroup>
@@ -183,32 +181,6 @@ export function SchemaField({ field, value, onChange }: SchemaFieldProps) {
 						</Select.Positioner>
 					</Portal>
 				</Select.Root>
-				// <div className="space-y-1.5">
-				// 	<Label htmlFor={fieldId} className="text-xs">
-				// 		{field.label}
-				// 	</Label>
-				// 	<Select1
-				// 		value={strValue}
-				// 		onValueChange={(v) => {
-				// 			onChange(v);
-				// 		}}
-				// 	>
-				// 		<SelectTrigger id={fieldId} className="h-8 text-xs">
-				// 			<SelectValue />
-				// 		</SelectTrigger>
-				// 		<SelectContent>
-				// 			{field.options.map((opt) => (
-				// 				<SelectItem
-				// 					key={opt.value}
-				// 					value={opt.value}
-				// 					className="text-xs"
-				// 				>
-				// 					{opt.label}
-				// 				</SelectItem>
-				// 			))}
-				// 		</SelectContent>
-				// 	</Select1>
-				// </div>
 			);
 		}
 		case 'number': {

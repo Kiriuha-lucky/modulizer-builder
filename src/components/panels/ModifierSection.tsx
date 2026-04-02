@@ -1,20 +1,20 @@
 import { useMemo, useState } from 'react';
-import { X, Plus, GripVertical } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Plus } from 'lucide-react';
 import type { Modifier } from '@/types/gridfinity';
 import { useProjectStore } from '@/store/projectStore';
 import { cn } from '@/lib/utils';
 import { modifierKindRegistry } from '@/engine/registry/modifierKindRegistry';
 import type { ModifierControlsComponentProps } from '@/engine/registry/types';
 import { SchemaModifierControls } from './SchemaModifierControls';
+import {
+	Button,
+	Box,
+	CloseButton,
+	Flex,
+	Heading,
+	Menu,
+	Portal,
+} from '@chakra-ui/react';
 
 interface ModifierSectionProps {
 	parentId: string;
@@ -67,50 +67,93 @@ export function ModifierSection({ parentId, depth = 0 }: ModifierSectionProps) {
 	};
 
 	return (
-		<div className={depth > 0 ? 'ml-2 border-l border-border pl-2' : ''}>
-			<div className="flex items-center justify-between">
-				<Label className="text-xs text-muted-foreground">
-					{depth === 0 ? 'Modifiers' : 'Sub-modifiers'}
-				</Label>
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button
-							variant="ghost"
-							size="icon"
-							className="h-8 w-8 md:h-6 md:w-6"
-							aria-label={
-								depth === 0
-									? 'Add modifier'
-									: 'Add sub-modifier'
-							}
-							data-testid="add-modifier-btn"
-						>
-							<Plus className="h-4 w-4 md:h-3 md:w-3" />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent>
-						{modifierKindRegistry.getAll().map((reg) => {
-							console.log(reg);
-							return (
-								<DropdownMenuItem
-									key={reg.kind}
-									onClick={() =>
-										addModifier(parentId, reg.kind)
-									}
-								>
-									{reg.label}
-								</DropdownMenuItem>
-							);
-						})}
-					</DropdownMenuContent>
-				</DropdownMenu>
-			</div>
+		<Box w={'full'} flexGrow={0}>
+			<Flex justifyContent={'space-between'} alignItems={'center'}>
+				<Heading size={'lg'}>
+					{depth === 0 ? 'Дополнительные опции' : 'Sub-modifiers'}
+				</Heading>
 
-			{modifiers.length === 0 && (
-				<div className="py-2 text-center text-xs text-muted-foreground">
-					No modifiers added.
-				</div>
-			)}
+				<Menu.Root>
+					<Menu.Trigger asChild>
+						<Button
+							w="25px"
+							h="25px"
+							minW="25px"
+							p="0"
+							borderRadius="full"
+							display="flex"
+							alignItems="center"
+							justifyContent="center"
+							flexGrow={0}
+							flexShrink={0}
+							fontWeight="700"
+							fontSize="12px"
+							color="white"
+							bg="linear-gradient(135deg, #2563eb 0%, #3b82f6 55%, #60a5fa 100%)"
+							_hover={{
+								transform: 'translateY(-1px)',
+								boxShadow:
+									'0 14px 28px rgba(37,99,235,0.34), inset 0 1px 0 rgba(255,255,255,0.18)',
+							}}
+							_active={{
+								transform: 'translateY(0px) scale(0.99)',
+							}}
+							transition="all 0.18s ease"
+						>
+							<Plus size={8} />
+						</Button>
+					</Menu.Trigger>
+
+					<Portal>
+						<Menu.Positioner zIndex={2000}>
+							<Menu.Content
+								w="260px"
+								p="6px"
+								borderRadius="18px"
+								border="1px solid"
+								borderColor="whiteAlpha.400"
+								bg="rgba(255,255,255,0.88)"
+								backdropFilter="blur(18px)"
+								boxShadow="
+									0 12px 36px rgba(15,23,42,0.14),
+									inset 0 1px 0 rgba(255,255,255,0.6)
+								"
+							>
+								{modifierKindRegistry.getAll().map((reg) => {
+									return (
+										<Menu.Item
+											key={reg.kind}
+											value={reg.label}
+											w="full"
+											borderRadius="12px"
+											px="12px"
+											py="11px"
+											fontSize="14px"
+											fontWeight="600"
+											color="gray.700"
+											_hover={{
+												bg: 'rgba(59,130,246,0.08)',
+												color: 'gray.900',
+											}}
+											onClick={() =>
+												addModifier(parentId, reg.kind)
+											}
+										>
+											{reg.label}
+										</Menu.Item>
+									);
+								})}
+							</Menu.Content>
+						</Menu.Positioner>
+					</Portal>
+				</Menu.Root>
+			</Flex>
+
+			{/*{modifiers.length === 0 && (*/}
+			{/*	<Text>*/}
+			{/*		No modifiers added.*/}
+			{/*	</Text>*/}
+			{/*)}*/}
 
 			{modifiers.map((modifier, index) => (
 				<ModifierCard
@@ -135,7 +178,7 @@ export function ModifierSection({ parentId, depth = 0 }: ModifierSectionProps) {
 					onDragEnd={handleDragEnd}
 				/>
 			))}
-		</div>
+		</Box>
 	);
 }
 
@@ -163,11 +206,8 @@ function ModifierCard({
 	onDrop,
 	onDragEnd,
 }: ModifierCardProps) {
-	const wallLabel =
-		'wall' in modifier.params ? ` (${String(modifier.params.wall)})` : '';
-
 	return (
-		<div
+		<Box
 			draggable={false}
 			onDragStart={onDragStart}
 			onDragOver={onDragOver}
@@ -180,38 +220,17 @@ function ModifierCard({
 			)}
 			data-testid={`modifier-${modifier.kind}`}
 		>
-			<div className="mb-2 flex items-center justify-between">
-				<div className="flex items-center gap-1">
-					<GripVertical className="h-3.5 w-3.5 cursor-grab text-muted-foreground opacity-50" />
-					<span className="text-xs font-medium">
-						{modifierKindRegistry.get(modifier.kind)?.label ??
-							modifier.kind}
-						{wallLabel}
-					</span>
-				</div>
-				<Button
-					variant="ghost"
-					size="icon"
-					className="h-7 w-7 md:h-5 md:w-5"
-					aria-label={`Remove ${modifierKindRegistry.get(modifier.kind)?.label ?? 'modifier'}`}
-					onClick={onRemove}
-					data-testid="remove-modifier-btn"
-				>
-					<X className="h-4 w-4 md:h-3 md:w-3" />
-				</Button>
-			</div>
+			<Flex justifyContent="space-between" alignItems="center">
+				<Heading size={'md'}>
+					{modifierKindRegistry.get(modifier.kind)?.label ??
+						modifier.kind}
+				</Heading>
+
+				<CloseButton onClick={onRemove} />
+			</Flex>
 
 			<ModifierControls modifier={modifier} />
-
-			{/* Recursive: sub-modifiers on this modifier (max depth 10) */}
-			{/*{depth < 10 ? (*/}
-			{/*	<ModifierSection parentId={modifier.id} depth={depth + 1} />*/}
-			{/*) : (*/}
-			{/*	<div className="mt-2 text-center text-xs text-muted-foreground">*/}
-			{/*		Max nesting depth reached*/}
-			{/*	</div>*/}
-			{/*)}*/}
-		</div>
+		</Box>
 	);
 }
 

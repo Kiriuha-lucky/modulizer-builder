@@ -20,7 +20,6 @@ import {
 	Portal,
 } from '@chakra-ui/react';
 import { HiColorSwatch } from 'react-icons/hi';
-import { russianLabels } from '@/types/russian-labels.ts';
 
 export function ObjectListPanel() {
 	const objects = useProjectStore((s) => s.objects);
@@ -192,7 +191,7 @@ export function ObjectListPanel() {
 													selectObject(id);
 												}}
 											>
-												{russianLabels?.[reg.kind]}
+												{reg.label}
 											</Menu.Item>
 										);
 									})}

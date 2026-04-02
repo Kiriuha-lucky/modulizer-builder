@@ -2,6 +2,7 @@ import type { ParamSchema } from '@/engine/registry/types';
 import type { Modifier } from '@/types/gridfinity';
 import { useProjectStore } from '@/store/projectStore';
 import { SchemaField } from './SchemaField';
+import { Flex } from '@chakra-ui/react';
 
 interface SchemaModifierControlsProps {
 	schema: ParamSchema;
@@ -15,7 +16,7 @@ export function SchemaModifierControls({
 	const updateModifierParams = useProjectStore((s) => s.updateModifierParams);
 
 	return (
-		<div className="space-y-3">
+		<Flex gap={4} direction="column">
 			{schema.fields.map((field) => (
 				<SchemaField
 					key={field.key}
@@ -30,6 +31,6 @@ export function SchemaModifierControls({
 					}}
 				/>
 			))}
-		</div>
+		</Flex>
 	);
 }
