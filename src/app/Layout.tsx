@@ -4,12 +4,6 @@ import { PropertiesPanel } from '@/components/panels/PropertiesPanel';
 import { Viewport } from '@/components/viewport/Viewport';
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary';
 import { PrintLayoutProvider } from '@/hooks/usePrintLayout';
-import {
-	Sheet,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-} from '@/components/ui/sheet';
 import { useUIStore } from '@/store/uiStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -88,22 +82,22 @@ export function Layout() {
 				</Grid>
 
 				{/*Mobile: Left panel as sheet overlay */}
-				{isMobile && (
-					<Sheet
-						open={leftPanelOpen}
-						onOpenChange={(open) => {
-							setLeftPanelOpen(open);
-							if (open) setRightPanelOpen(false);
-						}}
-					>
-						<SheetContent side="left" className="w-60 p-0">
-							<SheetHeader className="sr-only">
-								<SheetTitle>Objects</SheetTitle>
-							</SheetHeader>
-							<ObjectListPanel />
-						</SheetContent>
-					</Sheet>
-				)}
+				{/*{isMobile && (*/}
+				{/*	<Sheet*/}
+				{/*		open={leftPanelOpen}*/}
+				{/*		onOpenChange={(open) => {*/}
+				{/*			setLeftPanelOpen(open);*/}
+				{/*			if (open) setRightPanelOpen(false);*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		<SheetContent side="left" className="w-60 p-0">*/}
+				{/*			<SheetHeader className="sr-only">*/}
+				{/*				<SheetTitle>Objects</SheetTitle>*/}
+				{/*			</SheetHeader>*/}
+				{/*			<ObjectListPanel />*/}
+				{/*		</SheetContent>*/}
+				{/*	</Sheet>*/}
+				{/*)}*/}
 
 				{/* Mobile: Right panel as sheet overlay */}
 				{/*{isMobile && (*/}

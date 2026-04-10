@@ -1,4 +1,3 @@
-import { Label } from '@/components/ui/label';
 import type { ParamField } from '@/engine/registry/types';
 import {
 	Flex,
@@ -175,41 +174,41 @@ export function SchemaField({ field, value, onChange }: SchemaFieldProps) {
 				</Select.Root>
 			);
 		}
-		case 'number': {
-			const numValue = typeof value === 'number' ? value : 0;
-			return (
-				<div className="space-y-2">
-					<div className="flex items-center justify-between">
-						<Label htmlFor={fieldId} className="text-xs">
-							{field.label}
-						</Label>
-						<span className="text-xs tabular-nums text-muted-foreground">
-							{numValue}
-							{field.unit ?? ''}
-						</span>
-					</div>
-					<input
-						id={fieldId}
-						type="number"
-						value={numValue}
-						onChange={(e) => {
-							const parsed = Number(e.target.value);
-							if (e.target.value === '' || Number.isNaN(parsed))
-								return;
-							let clamped = parsed;
-							if (field.min !== undefined)
-								clamped = Math.max(field.min, clamped);
-							if (field.max !== undefined)
-								clamped = Math.min(field.max, clamped);
-							onChange(clamped);
-						}}
-						min={field.min}
-						max={field.max}
-						step={field.step}
-						className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-					/>
-				</div>
-			);
-		}
+		// case 'number': {
+		// 	const numValue = typeof value === 'number' ? value : 0;
+		// 	return (
+		// 		<div className="space-y-2">
+		// 			<div className="flex items-center justify-between">
+		// 				<Label htmlFor={fieldId} className="text-xs">
+		// 					{field.label}
+		// 				</Label>
+		// 				<span className="text-xs tabular-nums text-muted-foreground">
+		// 					{numValue}
+		// 					{field.unit ?? ''}
+		// 				</span>
+		// 			</div>
+		// 			<input
+		// 				id={fieldId}
+		// 				type="number"
+		// 				value={numValue}
+		// 				onChange={(e) => {
+		// 					const parsed = Number(e.target.value);
+		// 					if (e.target.value === '' || Number.isNaN(parsed))
+		// 						return;
+		// 					let clamped = parsed;
+		// 					if (field.min !== undefined)
+		// 						clamped = Math.max(field.min, clamped);
+		// 					if (field.max !== undefined)
+		// 						clamped = Math.min(field.max, clamped);
+		// 					onChange(clamped);
+		// 				}}
+		// 				min={field.min}
+		// 				max={field.max}
+		// 				step={field.step}
+		// 				className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+		// 			/>
+		// 		</div>
+		// 	);
+		// }
 	}
 }

@@ -1,11 +1,3 @@
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
 import { useProfileStore } from '@/store/profileStore';
 
 export function ProfileSelector() {
@@ -15,24 +7,24 @@ export function ProfileSelector() {
 
 	return (
 		<div className="space-y-1.5">
-			<Label
-				htmlFor="dimension-profile"
-				className="text-xs text-muted-foreground"
-			>
-				Тип профиля
-			</Label>
-			<Select value={activeProfileKey} onValueChange={setActiveProfile}>
-				<SelectTrigger id="dimension-profile" className="h-8 text-xs">
-					<SelectValue />
-				</SelectTrigger>
-				<SelectContent>
-					{Object.entries(profiles).map(([key, profile]) => (
-						<SelectItem key={key} value={key} className="text-xs">
-							{profile.name}
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
+			{/*<Label*/}
+			{/*	htmlFor="dimension-profile"*/}
+			{/*	className="text-xs text-muted-foreground"*/}
+			{/*>*/}
+			{/*	Тип профиля*/}
+			{/*</Label>*/}
+			{/*<Select value={activeProfileKey} onValueChange={setActiveProfile}>*/}
+			{/*	<SelectTrigger id="dimension-profile" className="h-8 text-xs">*/}
+			{/*		<SelectValue />*/}
+			{/*	</SelectTrigger>*/}
+			{/*	<SelectContent>*/}
+			{/*		{Object.entries(profiles).map(([key, profile]) => (*/}
+			{/*			<SelectItem key={key} value={key} className="text-xs">*/}
+			{/*				{profile.name}*/}
+			{/*			</SelectItem>*/}
+			{/*		))}*/}
+			{/*	</SelectContent>*/}
+			{/*</Select>*/}
 		</div>
 	);
 }

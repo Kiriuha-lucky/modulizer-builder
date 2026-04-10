@@ -30,7 +30,7 @@ import type {
 } from '@/types/gridfinity';
 import { BaseplateProperties } from '@/components/panels/BaseplateProperties';
 import { BinProperties } from '@/components/panels/BinProperties';
-import { OpenGridBoardProperties } from '@/components/panels/OpenGridBoardProperties';
+// import { OpenGridBoardProperties } from '@/components/panels/OpenGridBoardProperties';
 import { DividerGridControls } from '@/components/panels/modifiers/DividerGridControls';
 import { LabelTabControls } from '@/components/panels/modifiers/LabelTabControls';
 import type { ComponentType } from 'react';
@@ -92,17 +92,17 @@ export function registerBuiltinKinds(): void {
 		PropertiesComponent: asPropertiesComponent(BinProperties),
 	});
 
-	objectKindRegistry.register({
-		kind: 'opengridBoard',
-		label: 'Сетка OpenGrid',
-		icon: Grip,
-		defaultParams: { ...DEFAULT_OPENGRID_BOARD_PARAMS },
-		generateGeometry: generateOpenGridBoard,
-		getDimensions: getOpenGridBoardDimensions,
-		getPrintRotation: () => new Euler(0, 0, 0),
-		supportsModifiers: false,
-		PropertiesComponent: asPropertiesComponent(OpenGridBoardProperties),
-	});
+	// objectKindRegistry.register({
+	// 	kind: 'opengridBoard',
+	// 	label: 'Сетка OpenGrid',
+	// 	icon: Grip,
+	// 	defaultParams: { ...DEFAULT_OPENGRID_BOARD_PARAMS },
+	// 	generateGeometry: generateOpenGridBoard,
+	// 	getDimensions: getOpenGridBoardDimensions,
+	// 	getPrintRotation: () => new Euler(0, 0, 0),
+	// 	supportsModifiers: false,
+	// 	PropertiesComponent: asPropertiesComponent(OpenGridBoardProperties),
+	// });
 
 	// --- Modifier kinds ---
 
