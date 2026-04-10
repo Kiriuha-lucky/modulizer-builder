@@ -1,10 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { Toolbar } from '@/components/toolbar/Toolbar';
 import { ObjectListPanel } from '@/components/panels/ObjectListPanel';
 import { PropertiesPanel } from '@/components/panels/PropertiesPanel';
-import { PrintSettingsPanel } from '@/components/panels/PrintSettingsPanel';
 import { Viewport } from '@/components/viewport/Viewport';
-import { PrintLayoutViewport } from '@/components/viewport/PrintLayoutViewport';
 import { ViewportErrorBoundary } from '@/components/viewport/ViewportErrorBoundary';
 import { PrintLayoutProvider } from '@/hooks/usePrintLayout';
 import {
@@ -16,7 +13,7 @@ import {
 import { useUIStore } from '@/store/uiStore';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { Box, Grid, Flex, Show } from '@chakra-ui/react';
+import { Box, Grid, Show } from '@chakra-ui/react';
 import { Header } from '@/components/header/Header.tsx';
 
 export function Layout() {

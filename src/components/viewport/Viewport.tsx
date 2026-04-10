@@ -189,9 +189,9 @@ function Scene() {
 				))}
 			</group>
 
-			{/* Measurement overlay */}
+			{/*Measurement overlay */}
 			{/*{showMeasurements && singleSelectedObject && (*/}
-			{/*  <MeasurementOverlay object={singleSelectedObject} />*/}
+			{/*	<MeasurementOverlay object={singleSelectedObject} />*/}
 			{/*)}*/}
 
 			{/* Gizmo helper - axis indicator in corner */}

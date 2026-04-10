@@ -15,6 +15,7 @@ import {
 	Menu,
 	Portal,
 } from '@chakra-ui/react';
+import { Tooltip } from '@/components/ui/tooltip.tsx';
 
 interface ModifierSectionProps {
 	parentId: string;
@@ -100,7 +101,9 @@ export function ModifierSection({ parentId, depth = 0 }: ModifierSectionProps) {
 							}}
 							transition="all 0.18s ease"
 						>
-							<Plus size={8} />
+							<Tooltip content="Добавить модификацию">
+								<Plus size={8} />
+							</Tooltip>
 						</Button>
 					</Menu.Trigger>
 
@@ -185,7 +188,7 @@ export function ModifierSection({ parentId, depth = 0 }: ModifierSectionProps) {
 interface ModifierCardProps {
 	modifier: Modifier;
 	index: number;
-	depth: number;
+	depth?: number;
 	isDragging: boolean;
 	isDropTarget: boolean;
 	onRemove: () => void;
@@ -197,7 +200,6 @@ interface ModifierCardProps {
 
 function ModifierCard({
 	modifier,
-	depth,
 	isDragging,
 	isDropTarget,
 	onRemove,
@@ -225,8 +227,11 @@ function ModifierCard({
 					{modifierKindRegistry.get(modifier.kind)?.label ??
 						modifier.kind}
 				</Heading>
-
-				<CloseButton onClick={onRemove} />
+				<Tooltip
+					content={`Удалить модификатор "${modifierKindRegistry.get(modifier.kind)?.label ?? modifier.kind}"`}
+				>
+					<CloseButton onClick={onRemove} />
+				</Tooltip>
 			</Flex>
 
 			<ModifierControls modifier={modifier} />

@@ -9,6 +9,7 @@ import {
 import type { IconType } from 'react-icons';
 import { useUIStore } from '@/store/uiStore.ts';
 import type { CameraPreset } from '@/types/gridfinity.ts';
+import { useState } from 'react';
 
 export type ViewModeSwitcherLayout = 'horizontal' | 'vertical' | 'grid';
 
@@ -40,10 +41,10 @@ interface ViewItem {
 
 const items: ViewItem[] = [
 	{ key: 'top', label: 'Вид сверху', icon: LuPanelTop },
-	{ key: 'bottom', label: 'Снизу', icon: LuPanelBottom },
+	{ key: 'bottom', label: 'Вид снизу', icon: LuPanelBottom },
 	{ key: 'front', label: 'Вид спереди', icon: LuPanelLeft },
-	{ key: 'side', label: 'Справа', icon: LuPanelRight },
-	{ key: 'isometric', label: '3D', icon: LuBox, active: true },
+	{ key: 'side', label: 'Вид справа', icon: LuPanelRight },
+	{ key: 'isometric', label: 'Вид 3D', icon: LuBox, active: true },
 ];
 
 function getPlacementStyles(placement: ViewModeSwitcherPlacement) {
@@ -124,7 +125,7 @@ export function ViewModeSwitcher({
 	const direction = getDirection(layout);
 	const placementStyles = getPlacementStyles(placement);
 	const setCameraPreset = useUIStore((s) => s.setCameraPreset);
-
+	const [activeTab, setActiveTab] = useState('isometric');
 	return (
 		<Box
 			position="absolute"
@@ -155,183 +156,92 @@ export function ViewModeSwitcher({
 				filter="blur(28px)"
 				pointerEvents="none"
 			/>
+			<Flex
+				position="relative"
+				zIndex={1}
+				direction={direction}
+				gap="6px"
+			>
+				{items.map((item) => {
+					const Icon = item.icon;
+					const isActive = item.key === activeTab;
 
-			{direction === 'grid' ? (
-				<Flex
-					position="relative"
-					zIndex={1}
-					display="grid"
-					gridTemplateColumns="repeat(3, 40px)"
-					gridTemplateRows="repeat(2, 40px)"
-					gap="6px"
-				>
-					{items.map((item) => {
-						const Icon = item.icon;
-						const isActive = item.active;
+					return (
+						<Tooltip.Root
+							key={item.key}
+							positioning={{
+								placement:
+									layout === 'vertical' ? 'right' : 'top',
+							}}
+						>
+							<Tooltip.Trigger asChild>
+								<IconButton
+									aria-label={item.label}
+									size="sm"
+									variant="ghost"
+									borderRadius="14px"
+									minW="40px"
+									w="40px"
+									h="40px"
+									color={isActive ? 'blue.600' : 'gray.600'}
+									bg={
+										isActive
+											? 'rgba(59,130,246,0.12)'
+											: 'transparent'
+									}
+									border="1px solid"
+									borderColor={
+										isActive
+											? 'rgba(59,130,246,0.22)'
+											: 'transparent'
+									}
+									boxShadow={
+										isActive
+											? '0 4px 14px rgba(59,130,246,0.10), inset 0 1px 0 rgba(255,255,255,0.6)'
+											: 'none'
+									}
+									_hover={{
+										bg: isActive
+											? 'rgba(59,130,246,0.16)'
+											: 'rgba(15,23,42,0.06)',
+										color: isActive
+											? 'blue.700'
+											: 'gray.800',
+									}}
+									_active={{
+										transform: 'scale(0.98)',
+									}}
+									onClick={() => {
+										setCameraPreset(
+											item.key as CameraPreset
+										);
+										setActiveTab(item.key);
+									}}
+								>
+									<Icon size={18} />
+								</IconButton>
+							</Tooltip.Trigger>
 
-						return (
-							<Tooltip.Root
-								key={item.key}
-								positioning={{ placement: 'top' }}
-							>
-								<Tooltip.Trigger asChild>
-									<IconButton
-										aria-label={item.label}
-										size="sm"
-										variant="ghost"
-										borderRadius="14px"
-										minW="40px"
-										w="40px"
-										h="40px"
-										color={
-											isActive ? 'blue.600' : 'gray.600'
-										}
-										bg={
-											isActive
-												? 'rgba(59,130,246,0.12)'
-												: 'transparent'
-										}
-										border="1px solid"
-										borderColor={
-											isActive
-												? 'rgba(59,130,246,0.22)'
-												: 'transparent'
-										}
-										boxShadow={
-											isActive
-												? '0 4px 14px rgba(59,130,246,0.10), inset 0 1px 0 rgba(255,255,255,0.6)'
-												: 'none'
-										}
-										_hover={{
-											bg: isActive
-												? 'rgba(59,130,246,0.16)'
-												: 'rgba(15,23,42,0.06)',
-											color: isActive
-												? 'blue.700'
-												: 'gray.800',
-										}}
-										_active={{
-											transform: 'scale(0.98)',
-										}}
-										onClick={() => {
-											setCameraPreset(
-												item.key as CameraPreset
-											);
-										}}
+							<Portal>
+								<Tooltip.Positioner>
+									<Tooltip.Content
+										px="8px"
+										py="4px"
+										borderRadius="10px"
+										fontSize="12px"
+										fontWeight="600"
+										bg="gray.900"
+										color="white"
+										boxShadow="lg"
 									>
-										<Icon size={18} />
-									</IconButton>
-								</Tooltip.Trigger>
-
-								<Portal>
-									<Tooltip.Positioner>
-										<Tooltip.Content
-											px="8px"
-											py="4px"
-											borderRadius="10px"
-											fontSize="12px"
-											fontWeight="600"
-											bg="gray.900"
-											color="white"
-											boxShadow="lg"
-										>
-											{item.label}
-										</Tooltip.Content>
-									</Tooltip.Positioner>
-								</Portal>
-							</Tooltip.Root>
-						);
-					})}
-				</Flex>
-			) : (
-				<Flex
-					position="relative"
-					zIndex={1}
-					direction={direction}
-					gap="6px"
-				>
-					{items.map((item) => {
-						const Icon = item.icon;
-						const isActive = item.active;
-
-						return (
-							<Tooltip.Root
-								key={item.key}
-								positioning={{
-									placement:
-										layout === 'vertical' ? 'right' : 'top',
-								}}
-							>
-								<Tooltip.Trigger asChild>
-									<IconButton
-										aria-label={item.label}
-										size="sm"
-										variant="ghost"
-										borderRadius="14px"
-										minW="40px"
-										w="40px"
-										h="40px"
-										color={
-											isActive ? 'blue.600' : 'gray.600'
-										}
-										bg={
-											isActive
-												? 'rgba(59,130,246,0.12)'
-												: 'transparent'
-										}
-										border="1px solid"
-										borderColor={
-											isActive
-												? 'rgba(59,130,246,0.22)'
-												: 'transparent'
-										}
-										boxShadow={
-											isActive
-												? '0 4px 14px rgba(59,130,246,0.10), inset 0 1px 0 rgba(255,255,255,0.6)'
-												: 'none'
-										}
-										_hover={{
-											bg: isActive
-												? 'rgba(59,130,246,0.16)'
-												: 'rgba(15,23,42,0.06)',
-											color: isActive
-												? 'blue.700'
-												: 'gray.800',
-										}}
-										_active={{
-											transform: 'scale(0.98)',
-										}}
-										onClick={() => {
-											setCameraPreset(
-												item.key as CameraPreset
-											);
-										}}
-									>
-										<Icon size={18} />
-									</IconButton>
-								</Tooltip.Trigger>
-
-								<Portal>
-									<Tooltip.Positioner>
-										<Tooltip.Content
-											px="8px"
-											py="4px"
-											borderRadius="10px"
-											fontSize="12px"
-											fontWeight="600"
-											bg="gray.900"
-											color="white"
-											boxShadow="lg"
-										>
-											{item.label}
-										</Tooltip.Content>
-									</Tooltip.Positioner>
-								</Portal>
-							</Tooltip.Root>
-						);
-					})}
-				</Flex>
-			)}
+										{item.label}
+									</Tooltip.Content>
+								</Tooltip.Positioner>
+							</Portal>
+						</Tooltip.Root>
+					);
+				})}
+			</Flex>
 		</Box>
 	);
 }

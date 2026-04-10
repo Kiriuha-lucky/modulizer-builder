@@ -1,5 +1,3 @@
-import { Label } from '@/components/ui/label';
-import { Slider as Slider1 } from '@/components/ui/slider';
 import type { DividerGridModifier } from '@/types/gridfinity';
 import { useProjectStore } from '@/store/projectStore';
 import { Flex, HStack, Slider } from '@chakra-ui/react';
